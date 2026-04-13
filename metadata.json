@@ -1,0 +1,5 @@
+{
+  "name": "Google Sheets API Integration",
+  "description": "Backend module to connect and interact with Google Sheets using googleapis and Service Account.",
+  "requestFramePermissions": []
+}
