@@ -171,41 +171,66 @@ export default function App() {
 
   // 5. Lưu lại -> gọi API save
   const handleSave = async () => {
-    const keys = Object.keys(edits);
-    if (keys.length === 0) return;
-
     setSaving(true);
     setError('');
     setSuccessMsg('');
     
     try {
-      let finalKpiData = null;
-      // Gọi API save cho từng dòng có thay đổi tuần tự
-      for (const keyNhap of keys) {
-        const res = await fetch('/api/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ KeyNhap: keyNhap, ...edits[keyNhap] })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || `Lỗi khi lưu KeyNhap: ${keyNhap}`);
-        }
-        finalKpiData = data;
+      const payloadData = nhiemVu.map(nv => {
+        const keyNhap = nv.KeyNhap || nv.KEY_NHAP;
+        return {
+          KeyNhap: keyNhap,
+          SoGiao: Math.max(0, parseFloat(edits[keyNhap]?.SoGiao ?? nv.SoGiao ?? 0) || 0),
+          SoHoanThanh: Math.max(0, parseFloat(edits[keyNhap]?.SoHoanThanh ?? nv.SoHoanThanh ?? 0) || 0),
+          SoLoiChatLuong: Math.max(0, parseFloat(edits[keyNhap]?.SoLoiChatLuong ?? nv.SoLoiChatLuong ?? 0) || 0),
+          SoCham: Math.max(0, parseFloat(edits[keyNhap]?.SoCham ?? nv.SoCham ?? 0) || 0)
+        };
+      });
+
+      const apiThang = toYYYYMM(thang);
+      const res = await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          thang: apiThang,
+          maNhanSu: maNhanSu,
+          data: payloadData
+        })
+      });
+      
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Lỗi khi lưu dữ liệu');
       }
 
       setSuccessMsg('Lưu dữ liệu thành công!');
       
-      if (finalKpiData) {
-        setKpiData({
-          a: finalKpiData.a,
-          b: finalKpiData.b,
-          c: finalKpiData.c,
-          kpi: finalKpiData.kpi
+      // Cập nhật lại KPI cá nhân
+      setKpiData({
+        a: data.a,
+        b: data.b,
+        c: data.c,
+        kpi: data.kpi
+      });
+
+      // Gọi lại API KPI phụ trách để cập nhật
+      const ptRes = await fetch(`/api/kpi-phutrach?thang=${apiThang}`);
+      if (ptRes.ok) {
+        const ptData = await ptRes.json();
+        setKpiPhuTrachData({
+          a: ptData.a || 0,
+          b: ptData.b || 0,
+          c: ptData.c || 0,
+          d: ptData.d || 0,
+          dd: ptData.dd || 0,
+          e: ptData.e || 0,
+          kpi: ptData.kpi || 0
         });
       }
       
-      // Không reload lại toàn bộ dữ liệu để tránh giật lag
+      // Xóa edits sau khi lưu thành công
+      setEdits({});
+      
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -267,10 +292,10 @@ export default function App() {
             <button 
               onClick={handleSave} 
               disabled={saving || !maNhanSu || nhiemVu.length === 0} 
-              className="flex items-center bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-emerald-900/20"
             >
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              Tải dữ liệu
+              Lưu dữ liệu
             </button>
           </div>
         </div>
@@ -433,17 +458,18 @@ export default function App() {
                   nhiemVu.map((nv, idx) => {
                     const keyNhap = nv.KeyNhap || nv.KEY_NHAP;
                     const tenNv = nv.TenNhiemVu || nv.TEN_NHIEM_VU || nv.NhiemVu;
-                    const soGiao = parseFloat(nv.SoGiao || nv.SO_GIAO) || 0;
                     
+                    const editSoGiao = edits[keyNhap]?.SoGiao ?? nv.SoGiao;
                     const editSoHoanThanh = edits[keyNhap]?.SoHoanThanh ?? nv.SoHoanThanh;
                     const editSoLoi = edits[keyNhap]?.SoLoiChatLuong ?? nv.SoLoiChatLuong;
                     const editSoCham = edits[keyNhap]?.SoCham ?? nv.SoCham;
 
-                    const soHoanThanhNum = parseFloat(editSoHoanThanh) || 0;
-                    const soLoiNum = parseFloat(editSoLoi) || 0;
-                    const soChamNum = parseFloat(editSoCham) || 0;
+                    const soGiaoNum = Math.max(0, parseFloat(editSoGiao) || 0);
+                    const soHoanThanhNum = Math.max(0, parseFloat(editSoHoanThanh) || 0);
+                    const soLoiNum = Math.max(0, parseFloat(editSoLoi) || 0);
+                    const soChamNum = Math.max(0, parseFloat(editSoCham) || 0);
                     
-                    const progress = soGiao > 0 ? Math.min(100, (soHoanThanhNum / soGiao) * 100) : 0;
+                    const progress = soGiaoNum > 0 ? Math.min(100, (soHoanThanhNum / soGiaoNum) * 100) : 0;
                     const hasError = soLoiNum > 0;
                     const hasLate = soChamNum > 0;
 
@@ -459,11 +485,18 @@ export default function App() {
                           </div>
                         </td>
                         <td className="p-4 text-center align-middle">
-                          <span className="text-sm text-slate-400 font-medium bg-slate-800/50 px-3 py-1 rounded-md">{soGiao}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                            value={editSoGiao ?? ''}
+                            onChange={(e) => handleEdit(keyNhap, 'SoGiao', e.target.value)}
+                          />
                         </td>
                         <td className="p-4 text-center align-middle">
                           <input
                             type="number"
+                            min="0"
                             className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                             value={editSoHoanThanh ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoHoanThanh', e.target.value)}
@@ -472,6 +505,7 @@ export default function App() {
                         <td className="p-4 text-center align-middle">
                           <input
                             type="number"
+                            min="0"
                             className={`w-20 bg-slate-800 border rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none transition-all ${hasError ? 'border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-500/5' : 'border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`}
                             value={editSoLoi ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoLoiChatLuong', e.target.value)}
@@ -480,6 +514,7 @@ export default function App() {
                         <td className="p-4 text-center align-middle">
                           <input
                             type="number"
+                            min="0"
                             className={`w-20 bg-slate-800 border rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none transition-all ${hasLate ? 'border-orange-500/50 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 bg-orange-500/5' : 'border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`}
                             value={editSoCham ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoCham', e.target.value)}
