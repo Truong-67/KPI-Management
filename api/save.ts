@@ -5,211 +5,119 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { thang, maNhanSu, data: updates } = req.body;
+  let { thang, maNhanSu, data: updates } = req.body;
 
-  if (!thang || !maNhanSu || !Array.isArray(updates)) {
-    return res.status(400).json({ error: 'Missing thang, maNhanSu, or data array' });
+  // Convert MM/YYYY -> YYYY-MM
+  if (thang && thang.includes('/')) {
+    const [mm, yyyy] = thang.split('/');
+    thang = `${yyyy}-${mm}`;
   }
 
   try {
     const data = await readSheet('NHAP_LIEU');
-
-    if (!data || data.length <= 1) {
-      return res.status(404).json({ error: 'Sheet NHAP_LIEU is empty' });
-    }
-
     const headers = data[0];
 
-    const keyNhapIndex = headers.findIndex(
-      (h: string) =>
-        h.toLowerCase() === 'keynhap' ||
-        h.toLowerCase() === 'key_nhap'
-    );
+    const idx = (name: string) =>
+      headers.findIndex(h => h.toLowerCase() === name.toLowerCase());
 
-    if (keyNhapIndex === -1) {
-      return res.status(500).json({ error: 'Column KeyNhap not found' });
-    }
+    const iKey = idx('KeyNhap');
+    const iMaNV = idx('MaNhiemVu');
+    const iSoGiao = idx('SoGiao');
+    const iHT = idx('SoHoanThanh');
+    const iLoi = idx('SoLoiChatLuong');
+    const iCham = idx('SoCham');
+    const iQD = idx('QuyDoi');
+    const iA = idx('DiemSoLuong');
+    const iB = idx('DiemChatLuong');
+    const iC = idx('DiemTienDo');
 
-    // =========================
-    // LOAD HỆ SỐ QDV
-    // =========================
-    const qdvData = await readSheet('QDV');
-    const heSoMap: Record<string, number> = {};
+    // 👉 đọc QDV
+    const qdv = await readSheet('QDV');
+    const qHeaders = qdv[0];
+    const iMaNV_Q = qHeaders.findIndex(h => h.toLowerCase().includes('manhiemvu'));
+    const iHS_Q = qHeaders.findIndex(h => h.toLowerCase().includes('quydoi'));
 
-    if (qdvData && qdvData.length > 1) {
-      const qdvHeaders = qdvData[0];
-
-      const maNvIdx = qdvHeaders.findIndex(
-        (h: string) =>
-          h.toLowerCase() === 'manhiemvu' ||
-          h.toLowerCase() === 'ma_nhiem_vu'
-      );
-
-      const quyDoiIdx = qdvHeaders.findIndex(
-        (h: string) =>
-          h.toLowerCase() === 'quydoidexuat' ||
-          h.toLowerCase() === 'quy_doi_de_xuat'
-      );
-
-      if (maNvIdx !== -1 && quyDoiIdx !== -1) {
-        qdvData.slice(1).forEach((r: any[]) => {
-          heSoMap[r[maNvIdx]] = parseFloat(r[quyDoiIdx]) || 0;
-        });
-      }
-    }
-
-    // =========================
-    // UPDATE TỪNG DÒNG
-    // =========================
-    for (const update of updates) {
-      const { KeyNhap, SoGiao, SoHoanThanh, SoLoiChatLuong, SoCham } = update;
-      if (!KeyNhap) continue;
-
-      const rowIndex = data.findIndex(
-        (row: any[], idx: number) =>
-          idx > 0 && row[keyNhapIndex] === KeyNhap
-      );
-
-      if (rowIndex === -1) continue;
-
-      const rowToUpdate = [...data[rowIndex]];
-
-      const getVal = (colName: string) => {
-        const idx = headers.findIndex(
-          (h: string) => h.toLowerCase() === colName.toLowerCase()
-        );
-        return idx !== -1 ? parseFloat(rowToUpdate[idx]) || 0 : 0;
-      };
-
-      const setVal = (colName: string, val: any) => {
-        const idx = headers.findIndex(
-          (h: string) => h.toLowerCase() === colName.toLowerCase()
-        );
-        if (idx !== -1) rowToUpdate[idx] = val;
-      };
-
-      const getStr = (colName: string) => {
-        const idx = headers.findIndex(
-          (h: string) => h.toLowerCase() === colName.toLowerCase()
-        );
-        return idx !== -1 ? rowToUpdate[idx] : '';
-      };
-
-      // INPUT
-      if (SoGiao !== undefined) setVal('SoGiao', SoGiao);
-      if (SoHoanThanh !== undefined) setVal('SoHoanThanh', SoHoanThanh);
-      if (SoLoiChatLuong !== undefined) setVal('SoLoiChatLuong', SoLoiChatLuong);
-      if (SoCham !== undefined) setVal('SoCham', SoCham);
-
-      const maNhiemVu = getStr('MaNhiemVu');
-      const heSo = heSoMap[maNhiemVu] || 0;
-
-      const soGiaoVal = getVal('SoGiao');
-      const soHT = getVal('SoHoanThanh');
-      const soLoi = getVal('SoLoiChatLuong');
-      const soCham = getVal('SoCham');
-
-      // QUY ĐỔI
-      const quyDoi = soHT * heSo;
-      setVal('QuyDoi', quyDoi);
-
-      // a
-      const a = soGiaoVal === 0 ? 0 : (soHT / soGiaoVal) * 100;
-      setVal('DiemSoLuong', a);
-
-      // b
-      let giaTriB = soHT - soLoi * heSo * 0.25;
-      if (giaTriB < 0) giaTriB = 0;
-      const b = soGiaoVal === 0 ? 0 : (giaTriB / soGiaoVal) * 100;
-      setVal('DiemChatLuong', b);
-
-      // c
-      let giaTriC = soHT - soCham * heSo * 0.25;
-      if (giaTriC < 0) giaTriC = 0;
-      const c = soGiaoVal === 0 ? 0 : (giaTriC / soGiaoVal) * 100;
-      setVal('DiemTienDo', c);
-
-      // RANGE UPDATE
-      let endCol = '';
-      let temp = headers.length;
-      while (temp > 0) {
-        let mod = (temp - 1) % 26;
-        endCol = String.fromCharCode(65 + mod) + endCol;
-        temp = Math.floor((temp - mod) / 26);
-      }
-
-      const rowNumber = rowIndex + 1;
-      const range = `A${rowNumber}:${endCol}${rowNumber}`;
-
-      await updateSheet('NHAP_LIEU', range, [rowToUpdate]);
-
-      data[rowIndex] = rowToUpdate;
-    }
-
-    // =========================
-    // KPI CHUẨN (GAS)
-    // =========================
-    const thangIdx = headers.findIndex(h => h.toLowerCase() === 'thang');
-    const maNsIdx = headers.findIndex(h =>
-      h.toLowerCase() === 'manhansu' || h.toLowerCase() === 'ma_nhan_su'
-    );
-
-    const rowsUser = data.slice(1).filter(
-      (r: any[]) => r[thangIdx] === thang && r[maNsIdx] === maNhanSu
-    );
-
-    let totalGiao = 0;
-    let totalHT = 0;
-    let totalGiaTriB = 0;
-    let totalGiaTriC = 0;
-
-    rowsUser.forEach((r: any[]) => {
-      const getVal = (col: string) => {
-        const idx = headers.findIndex(h => h.toLowerCase() === col.toLowerCase());
-        return idx !== -1 ? parseFloat(r[idx]) || 0 : 0;
-      };
-
-      const getStr = (col: string) => {
-        const idx = headers.findIndex(h => h.toLowerCase() === col.toLowerCase());
-        return idx !== -1 ? r[idx] : '';
-      };
-
-      const maNV = getStr('MaNhiemVu');
-      const heSo = heSoMap[maNV] || 0;
-
-      const giao = getVal('SoGiao');
-      const ht = getVal('SoHoanThanh');
-      const loi = getVal('SoLoiChatLuong');
-      const cham = getVal('SoCham');
-
-      totalGiao += giao;
-      totalHT += ht;
-
-      let giaTriB = ht - loi * heSo * 0.25;
-      if (giaTriB < 0) giaTriB = 0;
-      totalGiaTriB += giaTriB;
-
-      let giaTriC = ht - cham * heSo * 0.25;
-      if (giaTriC < 0) giaTriC = 0;
-      totalGiaTriC += giaTriC;
+    const heSoMap: any = {};
+    qdv.slice(1).forEach(r => {
+      heSoMap[r[iMaNV_Q]] = parseFloat(r[iHS_Q]) || 0;
     });
 
-    const a = totalGiao === 0 ? 0 : (totalHT / totalGiao) * 100;
-    const b = totalGiao === 0 ? 0 : (totalGiaTriB / totalGiao) * 100;
-    const c = totalGiao === 0 ? 0 : (totalGiaTriC / totalGiao) * 100;
+    // ===== UPDATE =====
+    for (const u of updates) {
+      const rowIndex = data.findIndex((r: any, i: number) =>
+        i > 0 && r[iKey] === u.KeyNhap
+      );
+      if (rowIndex === -1) continue;
 
-    const kpi = ((a + b + c) / 3) * 70 / 100;
+      const row = [...data[rowIndex]];
+
+      if (u.SoGiao !== undefined) row[iSoGiao] = Number(u.SoGiao);
+      if (u.SoHoanThanh !== undefined) row[iHT] = Number(u.SoHoanThanh);
+      if (u.SoLoiChatLuong !== undefined) row[iLoi] = Number(u.SoLoiChatLuong);
+      if (u.SoCham !== undefined) row[iCham] = Number(u.SoCham);
+
+      const heSo = heSoMap[row[iMaNV]] || 0;
+
+      const soGiao = Number(row[iSoGiao]) || 0;
+      const ht = Number(row[iHT]) || 0;
+      const loi = Number(row[iLoi]) || 0;
+      const cham = Number(row[iCham]) || 0;
+
+      // ===== GIỐNG GAS =====
+      const quyDoi = ht * heSo;
+
+      const a = soGiao === 0 ? 0 : (ht / soGiao) * 100;
+
+      let b_raw = ht - (loi * heSo * 0.25);
+      if (b_raw < 0) b_raw = 0;
+      const b = soGiao === 0 ? 0 : (b_raw / soGiao) * 100;
+
+      let c_raw = ht - (cham * heSo * 0.25);
+      if (c_raw < 0) c_raw = 0;
+      const c = soGiao === 0 ? 0 : (c_raw / soGiao) * 100;
+
+      row[iQD] = quyDoi;
+      row[iA] = a;
+      row[iB] = b;
+      row[iC] = c;
+
+      // update 1 dòng
+      const rowNumber = rowIndex + 1;
+      const range = `A${rowNumber}:${String.fromCharCode(65 + headers.length - 1)}${rowNumber}`;
+      await updateSheet('NHAP_LIEU', range, [row]);
+
+      data[rowIndex] = row;
+    }
+
+    // ===== KPI CÁ NHÂN (GIỐNG GAS) =====
+    const rows = data.slice(1);
+
+    let sumA = 0, sumB = 0, sumC = 0, count = 0;
+
+    rows.forEach(r => {
+      if (r[idx('Thang')] === thang && r[idx('MaNhanSu')] === maNhanSu) {
+        sumA += Number(r[iA]) || 0;
+        sumB += Number(r[iB]) || 0;
+        sumC += Number(r[iC]) || 0;
+        count++;
+      }
+    });
+
+    const avgA = count ? sumA / count : 0;
+    const avgB = count ? sumB / count : 0;
+    const avgC = count ? sumC / count : 0;
+    const kpi = count ? ((avgA + avgB + avgC) / 3) * 70 / 100 : 0;
 
     return res.status(200).json({
       success: true,
-      a,
-      b,
-      c,
+      a: avgA,
+      b: avgB,
+      c: avgC,
       kpi
     });
 
-  } catch (error: any) {
-    console.error('Error updating NHAP_LIEU:', error);
-    return res.status(500).json({ error: error.message });
+  } catch (err: any) {
+    console.error(err);
+    return res.status(500).json({ error: err.message });
   }
 }
