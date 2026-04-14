@@ -7,7 +7,7 @@ export default async function handler(req: any, res: any) {
 
   let { thang, maNhanSu } = req.query;
 
-  // Convert MM/YYYY -> YYYY-MM
+  // MM/YYYY → YYYY-MM
   if (thang && thang.includes('/')) {
     const [mm, yyyy] = thang.split('/');
     thang = `${yyyy}-${mm}`;
@@ -20,44 +20,67 @@ export default async function handler(req: any, res: any) {
     }
 
     const headers = data[0];
-    const rows = data.slice(1).filter(r => r && r.length > 0);
+    const rows = data.slice(1);
 
     const idx = (name: string) =>
       headers.findIndex(h => h.toLowerCase() === name.toLowerCase());
 
     const iThang = idx('Thang');
     const iMaNS = idx('MaNhanSu');
-    const iA = idx('DiemSoLuong');
-    const iB = idx('DiemChatLuong');
-    const iC = idx('DiemTienDo');
+    const iMaNV = idx('MaNhiemVu');
+    const iGiao = idx('SoGiao');
+    const iHT = idx('SoHoanThanh');
+    const iLoi = idx('SoLoiChatLuong');
+    const iCham = idx('SoCham');
 
-    let sumA = 0, sumB = 0, sumC = 0, count = 0;
+    // 👉 đọc hệ số
+    const qdv = await readSheet('QDV');
+    const qHeaders = qdv[0];
+    const iMaNV_Q = qHeaders.findIndex(h => h.toLowerCase().includes('manhiemvu'));
+    const iHS_Q = qHeaders.findIndex(h => h.toLowerCase().includes('quydoi'));
+
+    const heSoMap: any = {};
+    qdv.slice(1).forEach(r => {
+      heSoMap[r[iMaNV_Q]] = parseFloat(r[iHS_Q]) || 0;
+    });
+
+    let tongGiaoQD = 0;
+    let tongHTQD = 0;
+    let tongCLQD = 0;
+    let tongTDQD = 0;
 
     rows.forEach(r => {
-      if (r[iThang] === thang && r[iMaNS] === maNhanSu) {
-        const a = parseFloat(r[iA]) || 0;
-        const b = parseFloat(r[iB]) || 0;
-        const c = parseFloat(r[iC]) || 0;
+      if (r[iThang] !== thang || r[iMaNS] !== maNhanSu) return;
 
-        sumA += a;
-        sumB += b;
-        sumC += c;
-        count++;
-      }
+      const soGiao = Number(r[iGiao]) || 0;
+      const soHT = Number(r[iHT]) || 0;
+      const soLoi = Number(r[iLoi]) || 0;
+      const soCham = Number(r[iCham]) || 0;
+
+      const heSo = heSoMap[r[iMaNV]] || 0;
+
+      const giaoQD = soGiao * heSo;
+      const htQD = soHT * heSo;
+
+      let clQD = htQD - soLoi * heSo * 0.25;
+      if (clQD < 0) clQD = 0;
+
+      let tdQD = htQD - soCham * heSo * 0.25;
+      if (tdQD < 0) tdQD = 0;
+
+      tongGiaoQD += giaoQD;
+      tongHTQD += htQD;
+      tongCLQD += clQD;
+      tongTDQD += tdQD;
     });
 
-    const avgA = count ? sumA / count : 0;
-    const avgB = count ? sumB / count : 0;
-    const avgC = count ? sumC / count : 0;
+    const a = tongGiaoQD === 0 ? 0 : (tongHTQD / tongGiaoQD) * 100;
+    const b = tongGiaoQD === 0 ? 0 : (tongCLQD / tongGiaoQD) * 100;
+    const c = tongGiaoQD === 0 ? 0 : (tongTDQD / tongGiaoQD) * 100;
 
-    const kpi = count ? ((avgA + avgB + avgC) / 3) * 70 / 100 : 0;
+    const kpi = ((a + b + c) / 3) * 70 / 100;
 
-    return res.status(200).json({
-      a: avgA,
-      b: avgB,
-      c: avgC,
-      kpi
-    });
+    return res.status(200).json({ a, b, c, kpi });
 
   } catch (err: any) {
     console.error(err);
