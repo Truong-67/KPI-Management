@@ -7,33 +7,30 @@ export default async function handler(req: any, res: any) {
 
   let { thang } = req.query;
 
-  // Convert "MM/YYYY" to "YYYY-MM"
+  // Convert MM/YYYY → YYYY-MM
   if (thang && thang.includes('/')) {
     const [mm, yyyy] = thang.split('/');
     thang = `${yyyy}-${mm}`;
   }
 
   try {
-    // 1. Calculate a, b, c from NHAP_LIEU
+    // =========================
+    // 1. TÍNH a, b, c (TOÀN PHÒNG)
+    // =========================
     const nhapLieuData = await readSheet('NHAP_LIEU');
-    let a = 0, b = 0, c = 0;
-    
-    if (nhapLieuData && nhapLieuData.length > 1) {
-      const nlHeaders = nhapLieuData[0];
-      const nlRows = nhapLieuData.slice(1).filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
-      
-      const nlResult = nlRows.map((row: any[]) => {
-        const obj: any = {};
-        nlHeaders.forEach((header: string, index: number) => {
-          obj[header] = row[index] || '';
-        });
-        return obj;
-      });
 
-      let filteredNl = nlResult;
-      if (thang) {
-        filteredNl = filteredNl.filter((item: any) => String(item.Thang || item.thang || item.THANG) === String(thang));
-      }
+    let a = 0, b = 0, c = 0;
+
+    if (nhapLieuData && nhapLieuData.length > 1) {
+      const headers = nhapLieuData[0];
+
+      const thangIdx = headers.findIndex(h => h.toLowerCase() === 'thang');
+      const soGiaoIdx = headers.findIndex(h => h.toLowerCase() === 'sogiao');
+      const soHTIdx = headers.findIndex(h => h.toLowerCase() === 'sohoanthanh');
+      const soLoiIdx = headers.findIndex(h => h.toLowerCase() === 'soloichatluong');
+      const soChamIdx = headers.findIndex(h => h.toLowerCase() === 'socham');
+
+      const rows = nhapLieuData.slice(1);
 
       let sumGiao = 0;
       let sumHT = 0;
@@ -41,72 +38,71 @@ export default async function handler(req: any, res: any) {
       let totalCham = 0;
       let count = 0;
 
-      filteredNl.forEach((item: any) => {
-        const soGiao = parseFloat(item.SoGiao || item.soGiao || item.SO_GIAO) || 0;
-        const soHT = parseFloat(item.SoHoanThanh || item.soHoanThanh || item.SO_HOAN_THANH) || 0;
-        const soLoi = parseFloat(item.SoLoiChatLuong || item.soLoiChatLuong || item.SO_LOI_CHAT_LUONG) || 0;
-        const soCham = parseFloat(item.SoCham || item.soCham || item.SO_CHAM) || 0;
+      rows.forEach((r: any[]) => {
+        if (!r || r.length === 0) return;
 
-        sumGiao += soGiao;
-        sumHT += soHT;
-        totalLoi += soLoi;
-        totalCham += soCham;
+        if (String(r[thangIdx]) !== String(thang)) return;
 
-        if (soGiao > 0) {
+        const giao = parseFloat(r[soGiaoIdx]) || 0;
+        const ht = parseFloat(r[soHTIdx]) || 0;
+        const loi = parseFloat(r[soLoiIdx]) || 0;
+        const cham = parseFloat(r[soChamIdx]) || 0;
+
+        // 🔥 CHỈ TÍNH DÒNG CÓ GIAO
+        if (giao > 0) {
+          sumGiao += giao;
+          sumHT += ht;
+          totalLoi += loi;
+          totalCham += cham;
           count++;
         }
       });
 
-      // Tính a
+      // a
       a = sumGiao === 0 ? 0 : (sumHT / sumGiao) * 100;
 
-      // Tính b
+      // b
       if (count > 0) {
         b = 100 - (totalLoi * 25 / count);
         if (b < 0) b = 0;
-      } else {
-        b = 0;
       }
 
-      // Tính c
+      // c
       if (count > 0) {
         c = 100 - (totalCham * 25 / count);
         if (c < 0) c = 0;
-      } else {
-        c = 0;
       }
     }
 
-    // 2. Get d, dd, e from NHAP_DIEM_PHU_TRACH
+    // =========================
+    // 2. LẤY d, đ, e
+    // =========================
     const diemPtData = await readSheet('NHAP_DIEM_PHU_TRACH');
+
     let d = 0, dd = 0, e = 0;
 
     if (diemPtData && diemPtData.length > 1) {
-      const ptHeaders = diemPtData[0];
-      const ptRows = diemPtData.slice(1).filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
-      
-      const ptResult = ptRows.map((row: any[]) => {
-        const obj: any = {};
-        ptHeaders.forEach((header: string, index: number) => {
-          obj[header] = row[index] || '';
-        });
-        return obj;
-      });
+      const headers = diemPtData[0];
 
-      let filteredPt = ptResult;
-      if (thang) {
-        filteredPt = filteredPt.filter((item: any) => String(item.Thang || item.thang || item.THANG) === String(thang));
-      }
+      const thangIdx = headers.findIndex(h => h.toLowerCase() === 'thang');
+      const dIdx = headers.findIndex(h => h.toLowerCase().includes('d'));
+      const ddIdx = headers.findIndex(h => h.toLowerCase().includes('dd') || h.toLowerCase().includes('đ'));
+      const eIdx = headers.findIndex(h => h.toLowerCase().includes('e'));
 
-      if (filteredPt.length > 0) {
-        const item = filteredPt[0];
-        d = parseFloat(item.DiemD || item.d || item.D) || 0;
-        dd = parseFloat(item.DiemDD || item.dd || item.DD || item.DiemĐ || item.đ || item.Đ) || 0;
-        e = parseFloat(item.DiemE || item.e || item.E) || 0;
+      const rows = diemPtData.slice(1);
+
+      const found = rows.find(r => String(r[thangIdx]) === String(thang));
+
+      if (found) {
+        d = parseFloat(found[dIdx]) || 0;
+        dd = parseFloat(found[ddIdx]) || 0;
+        e = parseFloat(found[eIdx]) || 0;
       }
     }
 
-    // 3. Calculate KPI
+    // =========================
+    // 3. KPI PHỤ TRÁCH
+    // =========================
     const kpi = ((a + b + c + d + dd + e) / 6) * 70 / 100;
 
     return res.status(200).json({
@@ -120,7 +116,7 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error: any) {
-    console.error('Error calculating KPI_PHU_TRACH:', error);
+    console.error('Error KPI_PHU_TRACH:', error);
     return res.status(500).json({ error: error.message });
   }
 }
