@@ -16,7 +16,26 @@ export default async function handler(req: any, res: any) {
   try {
 
     // =====================================================
-    // 1. TÍNH a, b, c TOÀN PHÒNG (ĐÚNG THEO GAS)
+    // 1. LOAD QDV (HỆ SỐ)
+    // =====================================================
+    const qdvData = await readSheet('QDV');
+    const heSoMap: Record<string, number> = {};
+
+    if (qdvData && qdvData.length > 1) {
+      const headers = qdvData[0].map((h: string) => h.toLowerCase());
+
+      const maIdx = headers.findIndex(h => h.includes('manhiemvu'));
+      const hsIdx = headers.findIndex(h => h.includes('quydoi'));
+
+      qdvData.slice(1).forEach((r: any[]) => {
+        const ma = r[maIdx];
+        const hs = parseFloat(r[hsIdx]) || 0;
+        heSoMap[ma] = hs;
+      });
+    }
+
+    // =====================================================
+    // 2. TÍNH a, b, c (THEO QUY ĐỔI)
     // =====================================================
     const nhapLieuData = await readSheet('NHAP_LIEU');
 
@@ -26,6 +45,7 @@ export default async function handler(req: any, res: any) {
       const headers = nhapLieuData[0].map((h: string) => h.toLowerCase());
 
       const thangIdx = headers.indexOf('thang');
+      const maNvIdx = headers.indexOf('manhiemvu');
       const soGiaoIdx = headers.indexOf('sogiao');
       const soHTIdx = headers.indexOf('sohoanthanh');
       const soLoiIdx = headers.indexOf('soloichatluong');
@@ -33,46 +53,52 @@ export default async function handler(req: any, res: any) {
 
       const rows = nhapLieuData.slice(1);
 
-      let sumGiao = 0;
-      let sumHT = 0;
-      let totalLoi = 0;
-      let totalCham = 0;
-      let count = 0;
+      let sumGiaoQD = 0;
+      let sumHTQD = 0;
+      let sumCLQD = 0;
+      let sumTDQD = 0;
 
       rows.forEach((r: any[]) => {
         if (!r || r.length === 0) return;
-
         if (String(r[thangIdx]) !== String(thang)) return;
+
+        const maNV = r[maNvIdx];
+        const heSo = heSoMap[maNV] || 0;
 
         const giao = parseFloat(r[soGiaoIdx]) || 0;
         const ht = parseFloat(r[soHTIdx]) || 0;
         const loi = parseFloat(r[soLoiIdx]) || 0;
         const cham = parseFloat(r[soChamIdx]) || 0;
 
-        // 🔥 CHỈ TÍNH DÒNG CÓ GIAO
-        if (giao > 0) {
-          sumGiao += giao;
-          sumHT += ht;
-          totalLoi += loi;
-          totalCham += cham;
-          count++;
-        }
+        if (giao <= 0) return;
+
+        // =========================
+        // QUY ĐỔI
+        // =========================
+        const giaoQD = giao * heSo;
+        const htQD = ht * heSo;
+
+        const clQD = htQD - (loi * heSo * 0.25);
+        const tdQD = htQD - (cham * heSo * 0.25);
+
+        sumGiaoQD += giaoQD;
+        sumHTQD += htQD;
+        sumCLQD += (clQD > 0 ? clQD : 0);
+        sumTDQD += (tdQD > 0 ? tdQD : 0);
       });
 
-      // a
-      a = sumGiao === 0 ? 0 : (sumHT / sumGiao) * 100;
-
-      // b
-      b = count > 0 ? 100 - (totalLoi * 25 / count) : 0;
-      if (b < 0) b = 0;
-
-      // c
-      c = count > 0 ? 100 - (totalCham * 25 / count) : 0;
-      if (c < 0) c = 0;
+      // =========================
+      // TÍNH a, b, c
+      // =========================
+      if (sumGiaoQD > 0) {
+        a = (sumHTQD / sumGiaoQD) * 100;
+        b = (sumCLQD / sumGiaoQD) * 100;
+        c = (sumTDQD / sumGiaoQD) * 100;
+      }
     }
 
     // =====================================================
-    // 2. LẤY d, đ, e (FIX CHUẨN – KHÔNG BAO GIỜ SAI)
+    // 3. LẤY d, đ, e
     // =====================================================
     const diemPtData = await readSheet('NHAP_DIEM_PHU_TRACH');
 
@@ -84,7 +110,6 @@ export default async function handler(req: any, res: any) {
 
       const thangIdx = headers.findIndex(h => h.includes('thang'));
 
-      // ⚠️ TÁCH RIÊNG d và đ (CỰC QUAN TRỌNG)
       const dIdx = headers.findIndex(h => h === 'd' || h.includes('diemd'));
       const ddIdx = headers.findIndex(h => h.includes('đ') || h.includes('diemđ') || h.includes('diemdd'));
       const eIdx = headers.findIndex(h => h === 'e' || h.includes('dieme'));
@@ -101,7 +126,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // =====================================================
-    // 3. KPI PHỤ TRÁCH
+    // 4. KPI PHỤ TRÁCH
     // =====================================================
     const kpi = ((a + b + c + d + dd + e) / 6) * 70 / 100;
 
