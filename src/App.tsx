@@ -324,7 +324,65 @@ export default function App() {
       setSaving(false);
     }
   };
+// ===== CHỐT THÁNG =====
+const handleChotThang = async () => {
+  if (!thang) return;
 
+  if (!confirm(`Chốt tháng ${thang}?`)) return;
+
+  setLoading(true);
+  setError('');
+  setSuccessMsg('');
+
+  try {
+    const res = await fetch('/api/chot-thang', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ thang })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+
+    setSuccessMsg(`Đã chốt tháng ${thang}`);
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// ===== RESET THÁNG =====
+const handleResetThang = async () => {
+  if (!confirm('Reset toàn bộ dữ liệu?')) return;
+
+  setLoading(true);
+  setError('');
+  setSuccessMsg('');
+
+  try {
+    const res = await fetch('/api/reset-thang', {
+      method: 'POST'
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+
+    setSuccessMsg('Đã reset dữ liệu');
+
+    // reload lại nhiệm vụ
+    if (thang && maNhanSu && maNhanSu !== PHU_TRACH_VALUE) {
+      await loadNhiemVu(thang, maNhanSu);
+    }
+
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
