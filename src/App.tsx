@@ -13,7 +13,7 @@ const toMMYYYY = (thangAPI: string) => {
   const [yyyy, mm] = thangAPI.split('-');
   return `${mm}/${yyyy}`;
 };
-
+const PHU_TRACH_VALUE = 'PHU_TRACH';
 export default function App() {
   const [nhanSuList, setNhanSuList] = useState<any[]>([]);
   const [thang, setThang] = useState<string>(''); // Stores "MM/YYYY"
@@ -48,7 +48,7 @@ export default function App() {
 
   // Fetch KPI cá nhân khi chọn tháng và nhân sự
   useEffect(() => {
-    if (thang && maNhanSu) {
+    if (thang && maNhanSu && maNhanSu !== PHU_TRACH_VALUE) {
       const apiThang = toYYYYMM(thang);
       fetch(`/api/kpi-canhan?thang=${apiThang}&maNhanSu=${maNhanSu}`)
         .then(res => res.json())
@@ -142,7 +142,7 @@ export default function App() {
     setMaNhanSu(newMa);
     setSuccessMsg('');
     
-    if (!thang || !newMa) {
+    if (!thang || !newMa || newMa === PHU_TRACH_VALUE) {
       setNhiemVu([]);
       return;
     }
@@ -279,7 +279,10 @@ export default function App() {
                 disabled={!thang}
               >
                 <option value="" className="bg-slate-800">Chọn nhân sự...</option>
-                {nhanSuList.map((ns, idx) => {
+                {[
+                  ...nhanSuList,
+                  { MaNhanSu: PHU_TRACH_VALUE, HoTen: 'Phụ trách phòng' }
+                ].map((ns, idx) => {
                   const ma = ns.MaNhanSu || ns.maNhanSu || ns.MA_NHAN_SU;
                   const ten = ns.HoTen || ns.hoTen || ns.HO_TEN || ns.TenNhanSu || ma;
                   return (
