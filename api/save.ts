@@ -7,14 +7,17 @@ export default async function handler(req: any, res: any) {
 
   let { thang, maNhanSu, data: updates } = req.body;
 
-  // MM/YYYY → YYYY-MM
-  if (thang && thang.includes('/')) {
-    const [mm, yyyy] = thang.split('/');
-    thang = `${yyyy}-${mm}`;
+  // YYYY-MM → MM/YYYY (đồng bộ toàn hệ thống)
+  if (thang && thang.includes('-')) {
+    const [yyyy, mm] = thang.split('-');
+    thang = `${mm}/${yyyy}`;
   }
 
   try {
     const data = await readSheet('NHAP_LIEU');
+    if (!data || data.length <= 1) {
+      return res.status(200).json({ success: true, a: 0, b: 0, c: 0, kpi: 0 });
+    }
     const headers = data[0];
 
     const idx = (name: string) =>
@@ -71,7 +74,10 @@ export default async function handler(req: any, res: any) {
     let tongTDQD = 0;
 
     rows.forEach(r => {
-      if (r[iThang] !== thang || r[iMaNS] !== maNhanSu) return;
+      if (
+        String(r[iThang]).trim() !== String(thang).trim() ||
+        String(r[iMaNS]).trim() !== String(maNhanSu).trim()
+      ) return;
 
       const soGiao = Number(r[iGiao]) || 0;
       const soHT = Number(r[iHT]) || 0;
