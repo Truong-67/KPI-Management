@@ -10,11 +10,7 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing thang' });
   }
 
-  // Convert "MM/YYYY" to "YYYY-MM"
-  if (thang.includes('/')) {
-    const [mm, yyyy] = thang.split('/');
-    thang = `${yyyy}-${mm}`;
-  }
+  // ✅ KHÔNG convert nữa → dùng MM/YYYY xuyên suốt
 
   try {
     const nhapLieuData = await readSheet('NHAP_LIEU');
@@ -22,7 +18,7 @@ export default async function handler(req: any, res: any) {
     
     const hasDataForThang = nhapLieuData.slice(1).some((row: any[]) => {
       const thangIdx = nhapLieuHeaders.findIndex((h: string) => h.toLowerCase() === 'thang');
-      return thangIdx !== -1 && String(row[thangIdx]) === String(thang);
+      return thangIdx !== -1 && String(row[thangIdx]).trim() === String(thang).trim();
     });
 
     if (hasDataForThang) {
@@ -35,7 +31,9 @@ export default async function handler(req: any, res: any) {
     }
 
     const pcHeaders = phanCongData[0];
-    const pcRows = phanCongData.slice(1).filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
+    const pcRows = phanCongData
+      .slice(1)
+      .filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
 
     const newRows = pcRows.map((row: any[]) => {
       const newRow = new Array(nhapLieuHeaders.length).fill('');
@@ -44,11 +42,17 @@ export default async function handler(req: any, res: any) {
         if (nlHeader.toLowerCase() === 'thang') {
           newRow[idx] = thang;
         } else if (nlHeader.toLowerCase() === 'keynhap') {
-           const maNsIdx = pcHeaders.findIndex((h: string) => h.toLowerCase() === 'manhansu' || h.toLowerCase() === 'ma_nhan_su');
-           const maNvIdx = pcHeaders.findIndex((h: string) => h.toLowerCase() === 'manhiemvu' || h.toLowerCase() === 'ma_nhiem_vu');
-           const maNs = maNsIdx !== -1 ? row[maNsIdx] : '';
-           const maNv = maNvIdx !== -1 ? row[maNvIdx] : '';
-           newRow[idx] = `${thang}_${maNs}_${maNv}`;
+          const maNsIdx = pcHeaders.findIndex((h: string) =>
+            h.toLowerCase() === 'manhansu' || h.toLowerCase() === 'ma_nhan_su'
+          );
+          const maNvIdx = pcHeaders.findIndex((h: string) =>
+            h.toLowerCase() === 'manhiemvu' || h.toLowerCase() === 'ma_nhiem_vu'
+          );
+
+          const maNs = maNsIdx !== -1 ? row[maNsIdx] : '';
+          const maNv = maNvIdx !== -1 ? row[maNvIdx] : '';
+
+          newRow[idx] = `${thang}_${maNs}_${maNv}`;
         } else {
           const pcIdx = pcHeaders.findIndex((h: string) => h === nlHeader);
           if (pcIdx !== -1) {
@@ -56,6 +60,7 @@ export default async function handler(req: any, res: any) {
           }
         }
       });
+
       return newRow;
     });
 
@@ -63,7 +68,11 @@ export default async function handler(req: any, res: any) {
       await writeSheet('NHAP_LIEU', newRows);
     }
 
-    return res.status(200).json({ success: true, message: `Đã khởi tạo ${newRows.length} nhiệm vụ cho tháng ${thang}` });
+    return res.status(200).json({
+      success: true,
+      message: `Đã khởi tạo ${newRows.length} nhiệm vụ cho tháng ${thang}`
+    });
+
   } catch (error: any) {
     console.error('Error init-thang:', error);
     return res.status(500).json({ error: error.message });
