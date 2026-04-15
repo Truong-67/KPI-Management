@@ -10,50 +10,73 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing thang' });
   }
 
-  // ✅ KHÔNG convert nữa → dùng MM/YYYY xuyên suốt
+  // ✅ DÙNG THẲNG MM/YYYY – KHÔNG CONVERT
 
   try {
+    // =====================================================
+    // 1. ĐỌC NHAP_LIEU → LẤY DANH SÁCH KEY ĐÃ CÓ
+    // =====================================================
     const nhapLieuData = await readSheet('NHAP_LIEU');
     const nhapLieuHeaders = nhapLieuData[0] || [];
-    
-    const hasDataForThang = nhapLieuData.slice(1).some((row: any[]) => {
-      const thangIdx = nhapLieuHeaders.findIndex((h: string) => h.toLowerCase() === 'thang');
-      return thangIdx !== -1 && String(row[thangIdx]).trim() === String(thang).trim();
-    });
 
-    if (hasDataForThang) {
-      return res.status(200).json({ message: 'Dữ liệu tháng này đã tồn tại' });
-    }
+    const keyIdx = nhapLieuHeaders.findIndex((h: string) => h.toLowerCase() === 'keynhap');
 
+    const existingKeys = new Set(
+      nhapLieuData
+        .slice(1)
+        .map((row: any[]) => String(row[keyIdx] || '').trim())
+        .filter((k: string) => k !== '')
+    );
+
+    // =====================================================
+    // 2. ĐỌC PHÂN CÔNG
+    // =====================================================
     const phanCongData = await readSheet('PHAN_CONG_NHIEM_VU');
+
     if (!phanCongData || phanCongData.length <= 1) {
       return res.status(404).json({ error: 'Không có dữ liệu trong PHAN_CONG_NHIEM_VU' });
     }
 
     const pcHeaders = phanCongData[0];
+
     const pcRows = phanCongData
       .slice(1)
       .filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
 
-    const newRows = pcRows.map((row: any[]) => {
+    const maNsIdx = pcHeaders.findIndex((h: string) =>
+      h.toLowerCase().includes('manhansu')
+    );
+
+    const maNvIdx = pcHeaders.findIndex((h: string) =>
+      h.toLowerCase().includes('manhiemvu')
+    );
+
+    // =====================================================
+    // 3. TẠO DÒNG MỚI (CHỈ THÊM NHỮNG KEY CHƯA CÓ)
+    // =====================================================
+    const newRows: any[] = [];
+
+    pcRows.forEach((row: any[]) => {
+      const maNs = maNsIdx !== -1 ? row[maNsIdx] : '';
+      const maNv = maNvIdx !== -1 ? row[maNvIdx] : '';
+
+      const key = `${thang}_${maNs}_${maNv}`;
+
+      // ❗ CHẶN TRÙNG – CỐT LÕI
+      if (existingKeys.has(key)) return;
+
       const newRow = new Array(nhapLieuHeaders.length).fill('');
-      
+
       nhapLieuHeaders.forEach((nlHeader: string, idx: number) => {
-        if (nlHeader.toLowerCase() === 'thang') {
+        const header = nlHeader.toLowerCase();
+
+        if (header === 'thang') {
           newRow[idx] = thang;
-        } else if (nlHeader.toLowerCase() === 'keynhap') {
-          const maNsIdx = pcHeaders.findIndex((h: string) =>
-            h.toLowerCase() === 'manhansu' || h.toLowerCase() === 'ma_nhan_su'
-          );
-          const maNvIdx = pcHeaders.findIndex((h: string) =>
-            h.toLowerCase() === 'manhiemvu' || h.toLowerCase() === 'ma_nhiem_vu'
-          );
-
-          const maNs = maNsIdx !== -1 ? row[maNsIdx] : '';
-          const maNv = maNvIdx !== -1 ? row[maNvIdx] : '';
-
-          newRow[idx] = `${thang}_${maNs}_${maNv}`;
-        } else {
+        } 
+        else if (header === 'keynhap') {
+          newRow[idx] = key;
+        } 
+        else {
           const pcIdx = pcHeaders.findIndex((h: string) => h === nlHeader);
           if (pcIdx !== -1) {
             newRow[idx] = row[pcIdx] || '';
@@ -61,16 +84,23 @@ export default async function handler(req: any, res: any) {
         }
       });
 
-      return newRow;
+      newRows.push(newRow);
     });
 
+    // =====================================================
+    // 4. GHI VÀO SHEET (CHỈ GHI PHẦN THIẾU)
+    // =====================================================
     if (newRows.length > 0) {
       await writeSheet('NHAP_LIEU', newRows);
     }
 
     return res.status(200).json({
       success: true,
-      message: `Đã khởi tạo ${newRows.length} nhiệm vụ cho tháng ${thang}`
+      added: newRows.length,
+      message:
+        newRows.length > 0
+          ? `Đã bổ sung ${newRows.length} nhiệm vụ còn thiếu cho tháng ${thang}`
+          : `Tháng ${thang} đã đầy đủ dữ liệu`
     });
 
   } catch (error: any) {
