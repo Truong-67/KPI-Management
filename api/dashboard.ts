@@ -7,10 +7,10 @@ export default async function handler(req: any, res: any) {
 
   let { thang } = req.query;
 
-  // Convert "MM/YYYY" to "YYYY-MM"
-  if (thang && thang.includes('/')) {
-    const [mm, yyyy] = thang.split('/');
-    thang = `${yyyy}-${mm}`;
+  // Convert "YYYY-MM" to "MM/YYYY"
+  if (thang && thang.includes('-')) {
+    const [yyyy, mm] = thang.split('-');
+    thang = `${mm}/${yyyy}`;
   }
 
   try {
@@ -21,7 +21,9 @@ export default async function handler(req: any, res: any) {
     }
 
     const headers = data[0];
-    const rows = data.slice(1).filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
+    const rows = data
+      .slice(1)
+      .filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
     
     let result = rows.map((row: any[]) => {
       const obj: any = {};
@@ -32,7 +34,10 @@ export default async function handler(req: any, res: any) {
     });
 
     if (thang) {
-      result = result.filter((item: any) => String(item.thang || item.Thang || item.THANG) === String(thang));
+      result = result.filter(
+        (item: any) =>
+          String(item.thang || item.Thang || item.THANG).trim() === String(thang).trim()
+      );
     }
 
     // Sort by Diem70 descending
