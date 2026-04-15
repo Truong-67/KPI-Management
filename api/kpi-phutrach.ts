@@ -61,7 +61,7 @@ export default async function handler(req: any, res: any) {
 
       rows.forEach((r: any[]) => {
         if (!r || r.length === 0) return;
-        if (String(r[thangIdx]) !== String(thang)) return;
+        if (String(r[thangIdx]).trim() !== String(thang).trim()) return;
 
         const maNV = r[maNvIdx];
         const heSo = heSoMap[maNV] || 0;
@@ -118,7 +118,9 @@ export default async function handler(req: any, res: any) {
 
       const rows = diemPtData.slice(1);
 
-      const found = rows.find(r => String(r[thangIdx]) === String(thang));
+      const found = rows.find(r =>
+        String(r[thangIdx]).trim() === String(thang).trim()
+      );
 
       if (found) {
         if (dIdx !== -1) d = parseFloat(found[dIdx]) || 0;
