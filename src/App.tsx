@@ -158,25 +158,29 @@ export default function App() {
 
   // 3. Khi chọn nhân sự -> load nhiệm vụ
   const handleNhanSuChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newMa = e.target.value;
-    setMaNhanSu(newMa);
-    setSuccessMsg('');
-    
-    if (!thang || !newMa || newMa === PHU_TRACH_VALUE) {
-      setNhiemVu([]);
-      return;
-    }
+  const newMa = e.target.value;
+  setMaNhanSu(newMa);
+  setSuccessMsg('');
 
-    setLoading(true);
-    setError('');
-    try {
-      await loadNhiemVu(thang, newMa);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // luôn reset bảng trước
+  setNhiemVu([]);
+
+  if (!thang || !newMa) return;
+
+  // 👉 nếu là PHỤ TRÁCH → KHÔNG load nhiệm vụ (đúng logic)
+  if (newMa === PHU_TRACH_VALUE) return;
+
+  setLoading(true);
+  setError('');
+
+  try {
+    await loadNhiemVu(thang, newMa);
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // 4. Cho phép nhập số liệu
   const handleEdit = (keyNhap: string, field: string, value: string) => {
