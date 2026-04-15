@@ -13,7 +13,9 @@ const toMMYYYY = (thangAPI: string) => {
   const [yyyy, mm] = thangAPI.split('-');
   return `${mm}/${yyyy}`;
 };
+
 const PHU_TRACH_VALUE = 'PHU_TRACH';
+
 export default function App() {
   const [nhanSuList, setNhanSuList] = useState<any[]>([]);
   const [thang, setThang] = useState<string>(''); // Stores "MM/YYYY"
@@ -23,6 +25,12 @@ export default function App() {
   const [edits, setEdits] = useState<Record<string, any>>({});
   const [kpiData, setKpiData] = useState<{a: number, b: number, c: number, kpi: number} | null>(null);
   const [kpiPhuTrachData, setKpiPhuTrachData] = useState<{a: number, b: number, c: number, d: number, dd: number, e: number, kpi: number} | null>(null);
+
+  const [ptInputs, setPtInputs] = useState<{ d: string; dd: string; e: string }>({
+    d: '',
+    dd: '',
+    e: ''
+  });
   
   const [loading, setLoading] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
@@ -30,6 +38,7 @@ export default function App() {
   const [successMsg, setSuccessMsg] = useState<string>('');
 
   const currentYear = new Date().getFullYear();
+  const isPhuTrachMode = maNhanSu === PHU_TRACH_VALUE;
 
   // 1. Load danh sách nhân sự khi khởi tạo
   useEffect(() => {
@@ -73,7 +82,7 @@ export default function App() {
       fetch(`/api/kpi-phutrach?thang=${apiThang}`)
         .then(res => res.json())
         .then(data => {
-          setKpiPhuTrachData({
+          const mapped = {
             a: data.a || 0,
             b: data.b || 0,
             c: data.c || 0,
@@ -81,11 +90,20 @@ export default function App() {
             dd: data.dd || 0,
             e: data.e || 0,
             kpi: data.kpi || 0
+          };
+
+          setKpiPhuTrachData(mapped);
+
+          setPtInputs({
+            d: String(mapped.d ?? 0),
+            dd: String(mapped.dd ?? 0),
+            e: String(mapped.e ?? 0)
           });
         })
         .catch(err => console.error('Lỗi khi tải KPI phụ trách:', err));
     } else {
       setKpiPhuTrachData(null);
+      setPtInputs({ d: '', dd: '', e: '' });
     }
   }, [thang]);
 
@@ -126,8 +144,10 @@ export default function App() {
       }
 
       // Nếu đã chọn nhân sự từ trước, load lại nhiệm vụ
-      if (maNhanSu) {
+      if (maNhanSu && maNhanSu !== PHU_TRACH_VALUE) {
         await loadNhiemVu(newThang, maNhanSu);
+      } else {
+        setNhiemVu([]);
       }
     } catch (err: any) {
       setError(err.message);
@@ -169,11 +189,68 @@ export default function App() {
     }));
   };
 
+  const handlePtInputChange = (field: 'd' | 'dd' | 'e', value: string) => {
+    setPtInputs(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   // 5. Lưu lại -> gọi API save
   const handleSave = async () => {
     setSaving(true);
     setError('');
     setSuccessMsg('');
+
+    if (isPhuTrachMode) {
+      try {
+        const apiThang = toYYYYMM(thang).includes('-')
+          ? (() => {
+              const [yyyy, mm] = toYYYYMM(thang).split('-');
+              return `${mm}/${yyyy}`;
+            })()
+          : thang;
+
+        const res = await fetch('/api/save-phutrach', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            thang: apiThang,
+            d: Math.max(0, parseFloat(ptInputs.d || '0') || 0),
+            dd: Math.max(0, parseFloat(ptInputs.dd || '0') || 0),
+            e: Math.max(0, parseFloat(ptInputs.e || '0') || 0)
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Lỗi khi lưu dữ liệu phụ trách');
+        }
+
+        setSuccessMsg('Lưu dữ liệu phụ trách thành công!');
+
+        setKpiPhuTrachData({
+          a: data.a || 0,
+          b: data.b || 0,
+          c: data.c || 0,
+          d: data.d || 0,
+          dd: data.dd || 0,
+          e: data.e || 0,
+          kpi: data.kpi || 0
+        });
+
+        setPtInputs({
+          d: String(data.d ?? 0),
+          dd: String(data.dd ?? 0),
+          e: String(data.e ?? 0)
+        });
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     
     try {
       const payloadData = nhiemVu.map(nv => {
@@ -225,6 +302,12 @@ export default function App() {
           dd: ptData.dd || 0,
           e: ptData.e || 0,
           kpi: ptData.kpi || 0
+        });
+
+        setPtInputs({
+          d: String(ptData.d ?? 0),
+          dd: String(ptData.dd ?? 0),
+          e: String(ptData.e ?? 0)
         });
       }
       
@@ -294,7 +377,7 @@ export default function App() {
 
             <button 
               onClick={handleSave} 
-              disabled={saving || !maNhanSu || nhiemVu.length === 0} 
+              disabled={saving || !maNhanSu || (!isPhuTrachMode && nhiemVu.length === 0)} 
               className="flex items-center bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-emerald-900/20"
             >
               {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
@@ -397,7 +480,17 @@ export default function App() {
                   <Star className="w-10 h-10 text-fuchsia-400" />
                 </div>
                 <p className="text-fuchsia-300 text-xs font-medium mb-1 relative z-10">PT d</p>
-                <p className="text-2xl font-bold text-white relative z-10">{kpiPhuTrachData.d.toFixed(2)}</p>
+                {isPhuTrachMode ? (
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-24 bg-slate-800 border border-fuchsia-700/50 rounded-lg px-3 py-2 text-xl font-bold text-white relative z-10 focus:outline-none focus:border-fuchsia-400 focus:ring-1 focus:ring-fuchsia-400"
+                    value={ptInputs.d}
+                    onChange={(e) => handlePtInputChange('d', e.target.value)}
+                  />
+                ) : (
+                  <p className="text-2xl font-bold text-white relative z-10">{kpiPhuTrachData.d.toFixed(2)}</p>
+                )}
               </div>
               
               <div className="bg-gradient-to-br from-cyan-900/40 to-cyan-800/10 border border-cyan-800/50 rounded-xl p-4 shadow-lg relative overflow-hidden group">
@@ -405,7 +498,17 @@ export default function App() {
                   <Shield className="w-10 h-10 text-cyan-400" />
                 </div>
                 <p className="text-cyan-300 text-xs font-medium mb-1 relative z-10">PT đ</p>
-                <p className="text-2xl font-bold text-white relative z-10">{kpiPhuTrachData.dd.toFixed(2)}</p>
+                {isPhuTrachMode ? (
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-24 bg-slate-800 border border-cyan-700/50 rounded-lg px-3 py-2 text-xl font-bold text-white relative z-10 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    value={ptInputs.dd}
+                    onChange={(e) => handlePtInputChange('dd', e.target.value)}
+                  />
+                ) : (
+                  <p className="text-2xl font-bold text-white relative z-10">{kpiPhuTrachData.dd.toFixed(2)}</p>
+                )}
               </div>
               
               <div className="bg-gradient-to-br from-slate-800/60 to-slate-800/20 border border-slate-700/50 rounded-xl p-4 shadow-lg relative overflow-hidden group">
@@ -413,7 +516,17 @@ export default function App() {
                   <FileText className="w-10 h-10 text-slate-400" />
                 </div>
                 <p className="text-slate-400 text-xs font-medium mb-1 relative z-10">PT e</p>
-                <p className="text-2xl font-bold text-white relative z-10">{kpiPhuTrachData.e.toFixed(2)}</p>
+                {isPhuTrachMode ? (
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-24 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xl font-bold text-white relative z-10 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400"
+                    value={ptInputs.e}
+                    onChange={(e) => handlePtInputChange('e', e.target.value)}
+                  />
+                ) : (
+                  <p className="text-2xl font-bold text-white relative z-10">{kpiPhuTrachData.e.toFixed(2)}</p>
+                )}
               </div>
               
               <div className="col-span-2 bg-gradient-to-br from-purple-900/60 to-purple-800/20 border border-purple-700/50 rounded-xl p-4 shadow-lg relative overflow-hidden group flex flex-col justify-center">
