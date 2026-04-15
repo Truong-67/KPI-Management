@@ -11,10 +11,10 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing thang or maNhanSu parameter' });
   }
 
-  // Convert "MM/YYYY" to "YYYY-MM"
-  if (thang.includes('/')) {
-    const [mm, yyyy] = thang.split('/');
-    thang = `${yyyy}-${mm}`;
+  // ✅ FIX FORMAT
+  if (thang.includes('-')) {
+    const [yyyy, mm] = thang.split('-');
+    thang = `${mm}/${yyyy}`;
   }
 
   try {
@@ -25,7 +25,9 @@ export default async function handler(req: any, res: any) {
     }
 
     const headers = data[0];
-    const rows = data.slice(1).filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
+    const rows = data
+      .slice(1)
+      .filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
     
     const result = rows.map((row: any[]) => {
       const obj: any = {};
@@ -39,7 +41,8 @@ export default async function handler(req: any, res: any) {
       const itemThang = item.Thang || item.thang || item.THANG;
       const itemMaNhanSu = item.MaNhanSu || item.maNhanSu || item.MA_NHAN_SU || item.ma_nhan_su;
       
-      return String(itemThang) === String(thang) && String(itemMaNhanSu) === String(maNhanSu);
+      return String(itemThang).trim() === String(thang).trim() 
+          && String(itemMaNhanSu).trim() === String(maNhanSu).trim();
     });
 
     return res.status(200).json(filtered);
