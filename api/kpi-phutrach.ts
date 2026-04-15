@@ -107,13 +107,14 @@ export default async function handler(req: any, res: any) {
 
     if (diemPtData && diemPtData.length > 1) {
       const headersRaw = diemPtData[0];
-      const headers = headersRaw.map((h: string) => h.toLowerCase());
+      const headers = headersRaw.map((h: string) => h.trim().toLowerCase());
 
-      const thangIdx = headers.findIndex(h => h.includes('thang'));
+      const thangIdx = headers.findIndex(h => h === 'thang');
 
-      const dIdx = headers.findIndex(h => h === 'd' || h.includes('diemd'));
-      const ddIdx = headers.findIndex(h => h.includes('đ') || h.includes('diemđ') || h.includes('diemdd'));
-      const eIdx = headers.findIndex(h => h === 'e' || h.includes('dieme'));
+      // ⚠️ FIX CỨNG - KHÔNG DÙNG includes CHUNG CHUNG
+      const dIdx = headers.findIndex(h => h === 'd' || h === 'diemd');
+      const ddIdx = headers.findIndex(h => h === 'đ' || h === 'diemđ' || h === 'diemdd');
+      const eIdx = headers.findIndex(h => h === 'e' || h === 'dieme');
 
       const rows = diemPtData.slice(1);
 
