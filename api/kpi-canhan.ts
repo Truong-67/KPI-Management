@@ -7,10 +7,10 @@ export default async function handler(req: any, res: any) {
 
   let { thang, maNhanSu } = req.query;
 
-  // MM/YYYY → YYYY-MM
-  if (thang && thang.includes('/')) {
-    const [mm, yyyy] = thang.split('/');
-    thang = `${yyyy}-${mm}`;
+  // YYYY-MM → MM/YYYY (đồng bộ toàn hệ thống)
+  if (thang && thang.includes('-')) {
+    const [yyyy, mm] = thang.split('-');
+    thang = `${mm}/${yyyy}`;
   }
 
   try {
@@ -35,6 +35,9 @@ export default async function handler(req: any, res: any) {
 
     // 👉 đọc hệ số
     const qdv = await readSheet('QDV');
+    if (!qdv || qdv.length <= 1) {
+      return res.status(200).json({ a: 0, b: 0, c: 0, kpi: 0 });
+    }
     const qHeaders = qdv[0];
     const iMaNV_Q = qHeaders.findIndex(h => h.toLowerCase().includes('manhiemvu'));
     const iHS_Q = qHeaders.findIndex(h => h.toLowerCase().includes('quydoi'));
@@ -50,7 +53,10 @@ export default async function handler(req: any, res: any) {
     let tongTDQD = 0;
 
     rows.forEach(r => {
-      if (r[iThang] !== thang || r[iMaNS] !== maNhanSu) return;
+      if (
+        String(r[iThang]).trim() !== String(thang).trim() ||
+        String(r[iMaNS]).trim() !== String(maNhanSu).trim()
+      ) return;
 
       const soGiao = Number(r[iGiao]) || 0;
       const soHT = Number(r[iHT]) || 0;
