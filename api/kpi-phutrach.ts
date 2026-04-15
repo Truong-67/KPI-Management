@@ -8,9 +8,10 @@ export default async function handler(req: any, res: any) {
   let { thang } = req.query;
 
   // Convert MM/YYYY → YYYY-MM
-  if (thang && thang.includes('/')) {
-    const [mm, yyyy] = thang.split('/');
-    thang = `${yyyy}-${mm}`;
+  // Chuẩn hoá về MM/YYYY
+  if (thang && thang.includes('-')) {
+  const [yyyy, mm] = thang.split('-');
+  thang = `${mm}/${yyyy}`;
   }
 
   try {
