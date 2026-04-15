@@ -11,113 +11,125 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Missing thang' });
   }
 
+  // YYYY-MM → MM/YYYY (đồng bộ toàn hệ thống)
+  if (thang && thang.includes('-')) {
+    const [yyyy, mm] = thang.split('-');
+    thang = `${mm}/${yyyy}`;
+  }
+
   try {
     const data = await readSheet('NHAP_LIEU');
-
     if (!data || data.length <= 1) {
-      return res.status(200).json({ success: true, message: 'Không có dữ liệu' });
+      return res.status(200).json({ success: true, message: 'Không có dữ liệu NHAP_LIEU' });
     }
 
     const headers = data[0];
+    const rows = data
+      .slice(1)
+      .filter((row: any[]) => row.length > 0 && row.some((cell: any) => String(cell).trim() !== ''));
 
     const idx = (name: string) =>
-      headers.findIndex(h => h.toLowerCase() === name.toLowerCase());
+      headers.findIndex((h: string) => h.toLowerCase() === name.toLowerCase());
 
     const iThang = idx('Thang');
     const iMaNS = idx('MaNhanSu');
     const iHoTen = idx('HoTen');
+    const iMaNV = idx('MaNhiemVu');
     const iGiao = idx('SoGiao');
     const iHT = idx('SoHoanThanh');
     const iLoi = idx('SoLoiChatLuong');
     const iCham = idx('SoCham');
 
-    const rows = data
-      .slice(1)
-      .filter((r: any[]) => r.length > 0 && r.some(c => c !== ''));
+    // Đọc hệ số từ QDV
+    const qdv = await readSheet('QDV');
+    if (!qdv || qdv.length <= 1) {
+      return res.status(200).json({ success: true, message: 'Không có dữ liệu QDV' });
+    }
 
-    const map: any = {};
+    const qHeaders = qdv[0];
+    const iMaNV_Q = qHeaders.findIndex((h: string) => h.toLowerCase().includes('manhiemvu'));
+    const iHS_Q = qHeaders.findIndex((h: string) => h.toLowerCase().includes('quydoi'));
 
-    // =========================
-    // GOM DỮ LIỆU THEO NHÂN SỰ
-    // =========================
-    rows.forEach(r => {
-      if (String(r[iThang]).trim() !== String(thang).trim()) return;
-
-      const ma = r[iMaNS];
-      const ten = r[iHoTen];
-
-      if (!ma) return;
-
-      if (!map[ma]) {
-        map[ma] = {
-          HoTen: ten,
-          giao: 0,
-          ht: 0,
-          count: 0,
-          tongB: 0,
-          tongC: 0
-        };
-      }
-
-      const soGiao = Number(r[iGiao]) || 0;
-      const soHT = Number(r[iHT]) || 0;
-      const soLoi = Number(r[iLoi]) || 0;
-      const soCham = Number(r[iCham]) || 0;
-
-      map[ma].giao += soGiao;
-      map[ma].ht += soHT;
-
-      // ===== TÍNH B (CHẤT LƯỢNG) =====
-      let b_nv = 100 - soLoi * 25;
-      if (b_nv < 0) b_nv = 0;
-
-      // ===== TÍNH C (TIẾN ĐỘ) =====
-      let c_nv = 100 - soCham * 25;
-      if (c_nv < 0) c_nv = 0;
-
-      map[ma].tongB += b_nv;
-      map[ma].tongC += c_nv;
-      map[ma].count += 1;
+    const heSoMap: Record<string, number> = {};
+    qdv.slice(1).forEach((r: any[]) => {
+      heSoMap[String(r[iMaNV_Q]).trim()] = parseFloat(r[iHS_Q]) || 0;
     });
 
-    // =========================
-    // TÍNH KPI
-    // =========================
+    // Lấy danh sách nhân sự có dữ liệu trong tháng
+    const userMap: Record<string, { hoTen: string }> = {};
+    rows.forEach((r: any[]) => {
+      if (String(r[iThang]).trim() !== String(thang).trim()) return;
+
+      const ma = String(r[iMaNS] ?? '').trim();
+      const ten = String(r[iHoTen] ?? '').trim();
+
+      if (!ma) return;
+      if (!userMap[ma]) {
+        userMap[ma] = { hoTen: ten };
+      }
+    });
+
     const output: any[] = [];
 
-    Object.keys(map).forEach(ma => {
-      const d = map[ma];
+    Object.keys(userMap).forEach((maNhanSu) => {
+      let tongGiaoQD = 0;
+      let tongHTQD = 0;
+      let tongCLQD = 0;
+      let tongTDQD = 0;
 
-      const a = d.giao === 0 ? 0 : (d.ht / d.giao) * 100;
+      rows.forEach((r: any[]) => {
+        if (
+          String(r[iThang]).trim() !== String(thang).trim() ||
+          String(r[iMaNS]).trim() !== String(maNhanSu).trim()
+        ) return;
 
-      const b = d.count === 0 ? 0 : d.tongB / d.count;
-      const c = d.count === 0 ? 0 : d.tongC / d.count;
+        const soGiao = Number(r[iGiao]) || 0;
+        const soHT = Number(r[iHT]) || 0;
+        const soLoi = Number(r[iLoi]) || 0;
+        const soCham = Number(r[iCham]) || 0;
 
-      const kpi = ((a + b + c) / 3) * 0.7;
+        const maNhiemVu = String(r[iMaNV] ?? '').trim();
+        const heSo = heSoMap[maNhiemVu] || 0;
+
+        const giaoQD = soGiao * heSo;
+        const htQD = soHT * heSo;
+
+        let clQD = htQD - soLoi * heSo * 0.25;
+        if (clQD < 0) clQD = 0;
+
+        let tdQD = htQD - soCham * heSo * 0.25;
+        if (tdQD < 0) tdQD = 0;
+
+        tongGiaoQD += giaoQD;
+        tongHTQD += htQD;
+        tongCLQD += clQD;
+        tongTDQD += tdQD;
+      });
+
+      const a = tongGiaoQD === 0 ? 0 : (tongHTQD / tongGiaoQD) * 100;
+      const b = tongGiaoQD === 0 ? 0 : (tongCLQD / tongGiaoQD) * 100;
+      const c = tongGiaoQD === 0 ? 0 : (tongTDQD / tongGiaoQD) * 100;
+      const kpi = ((a + b + c) / 3) * 70 / 100;
 
       output.push([
         thang,
-        ma,
-        d.HoTen,
-        Number(a.toFixed(2)),
-        Number(b.toFixed(2)),
-        Number(c.toFixed(2)),
-        Number(kpi.toFixed(2))
+        maNhanSu,
+        userMap[maNhanSu].hoTen,
+        Number(a.toFixed(8)),
+        Number(b.toFixed(8)),
+        Number(c.toFixed(8)),
+        Number(kpi.toFixed(8))
       ]);
     });
 
-    // =========================
-    // GHI KẾT QUẢ
-    // =========================
     if (output.length > 0) {
       await writeSheet('KPI_LUU_TRU', output);
     }
 
     return res.status(200).json({
       success: true,
-      message: `Đã chốt KPI tháng ${thang} (${output.length} nhân sự)`
+      message: `Đã chốt tháng ${thang} cho ${output.length} nhân sự`
     });
-
   } catch (err: any) {
     console.error('ERROR chot-thang:', err);
     return res.status(500).json({ error: err.message });
