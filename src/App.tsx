@@ -206,6 +206,18 @@ export default function App() {
       setPtInputs({ d: '', dd: '', e: '' });
     }
   }, [thang]);
+  useEffect(() => {
+  const tongTC = Object.values(diemTieuChi).reduce(
+    (sum: number, v: any) => sum + (Number(v) || 0),
+    0
+  );
+
+  setTongTieuChi(tongTC);
+
+  const kpi70 = kpiData?.kpi || 0;
+
+  setTongDiem(kpi70 + tongTC);
+}, [diemTieuChi, kpiData]);
 // ===== LOAD TIÊU CHÍ (ĐÚNG CHUẨN) =====
 useEffect(() => {
   if (!thang || !maNhanSu) return;
