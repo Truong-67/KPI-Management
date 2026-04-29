@@ -519,15 +519,16 @@ const handleResetThang = async () => {
       diem: parseFloat(diemTieuChi[id]) || 0
     }));
 
-    const res = await fetch('/api/save-tieuchi', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        thang,
-        maNhanSu,
-        data: payload
-      })
-    });
+    const res = await fetch('/api/data', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    action: 'save-tieuchi',
+    thang,
+    maNhanSu,
+    data: payload
+  })
+});
 
     const data = await res.json();
 
