@@ -15,7 +15,99 @@ const toMMYYYY = (thangAPI: string) => {
 };
 
 const PHU_TRACH_VALUE = 'PHU_TRACH';
+type TieuChiItem = {
+  id: string;
+  tt: string;
+  noiDung: string;
+  diemToiDa: number;
+  isGroup?: boolean;
+};
 
+const TIEU_CHI_CHUNG: TieuChiItem[] = [
+  {
+    id: 'I',
+    tt: 'I',
+    noiDung: 'Phẩm chất chính trị, phẩm chất đạo đức, văn hóa thực thi công vụ, nhiệm vụ và ý thức kỷ luật, kỷ cương trong thực thi công vụ, nhiệm vụ',
+    diemToiDa: 10,
+    isGroup: true
+  },
+  {
+    id: 'I1',
+    tt: '1',
+    noiDung: 'Phẩm chất chính trị, phẩm chất đạo đức, văn hóa thực thi công vụ, nhiệm vụ',
+    diemToiDa: 5
+  },
+  {
+    id: 'I2',
+    tt: '2',
+    noiDung: 'Ý thức kỷ luật, kỷ cương trong thực thi công vụ, nhiệm vụ',
+    diemToiDa: 5
+  },
+
+  {
+    id: 'II',
+    tt: 'II',
+    noiDung: 'Năng lực chuyên môn, nghiệp vụ theo yêu cầu của vị trí việc làm; khả năng đáp ứng yêu cầu thực thi nhiệm vụ được giao; tinh thần trách nhiệm trong thực thi công vụ, nhiệm vụ; thái độ phục vụ người dân, doanh nghiệp và khả năng phối hợp với đồng nghiệp',
+    diemToiDa: 10,
+    isGroup: true
+  },
+  {
+    id: 'II1',
+    tt: '1',
+    noiDung: 'Năng lực chuyên môn, nghiệp vụ theo yêu cầu của vị trí việc làm',
+    diemToiDa: 2.5
+  },
+  {
+    id: 'II2',
+    tt: '2',
+    noiDung: 'Khả năng đáp ứng yêu cầu thực thi nhiệm vụ được giao thường xuyên, đột xuất',
+    diemToiDa: 2.5
+  },
+  {
+    id: 'II3',
+    tt: '3',
+    noiDung: 'Tinh thần trách nhiệm trong thực thi công vụ, nhiệm vụ',
+    diemToiDa: 2.5
+  },
+  {
+    id: 'II4',
+    tt: '4',
+    noiDung: 'Thái độ phục vụ người dân, doanh nghiệp và khả năng phối hợp với đồng nghiệp',
+    diemToiDa: 2.5
+  },
+
+  {
+    id: 'III',
+    tt: 'III',
+    noiDung: 'Năng lực đổi mới, sáng tạo, dám nghĩ, dám làm, dám chịu trách nhiệm vì lợi ích chung trong thực thi công vụ, nhiệm vụ',
+    diemToiDa: 10,
+    isGroup: true
+  },
+  {
+    id: 'III1',
+    tt: '1',
+    noiDung: 'Có sản phẩm, giải pháp đột phá, sáng tạo đem lại giá trị, hiệu quả thiết thực, tác động tích cực đến kết quả thực hiện nhiệm vụ của cơ quan, tổ chức, đơn vị',
+    diemToiDa: 2.5
+  },
+  {
+    id: 'III2',
+    tt: '2',
+    noiDung: 'Sẵn sàng tham gia thực hiện nhiệm vụ chính trị đặc biệt quan trọng, nhiệm vụ có tính chất đột xuất, phức tạp hoặc trong điều kiện khó khăn',
+    diemToiDa: 2.5
+  },
+  {
+    id: 'III3',
+    tt: '3',
+    noiDung: 'Có tinh thần chịu trách nhiệm trước kết quả công việc; chủ động nhận trách nhiệm khi có sai sót và có biện pháp khắc phục rõ ràng, cụ thể',
+    diemToiDa: 2.5
+  },
+  {
+    id: 'III4',
+    tt: '4',
+    noiDung: 'Chủ động đưa ra quyết định trong phạm vi thẩm quyền, không né tránh; có tinh thần tiên phong trong thực hiện những nhiệm vụ mới',
+    diemToiDa: 2.5
+  }
+];
 export default function App() {
   const [nhanSuList, setNhanSuList] = useState<any[]>([]);
   const [thang, setThang] = useState<string>(''); // Stores "MM/YYYY"
