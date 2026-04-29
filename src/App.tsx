@@ -639,7 +639,7 @@ const handleResetThang = async () => {
         )}
 
         {/* KPI Phụ Trách */}
-        {kpiPhuTrachData && (
+        {activeTab === 'kpi' && kpiPhuTrachData && (
           <div className="space-y-4 mt-8">
             <h2 className="text-lg font-semibold text-white flex items-center gap-2 px-1">
               <Award className="w-5 h-5 text-purple-400" />
