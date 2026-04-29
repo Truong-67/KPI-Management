@@ -1,11 +1,12 @@
 import { readSheet } from './_sheets.js';
 
 export default async function handler(req: any, res: any) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+ if (req.method !== 'GET' && req.method !== 'POST') {
+  return res.status(405).json({ error: 'Method not allowed' });
+}
 
   let { thang, maNhanSu } = req.query;
+  const action = req.query.action;
 
   if (!thang || !maNhanSu) {
     return res.status(400).json({ error: 'Missing thang or maNhanSu parameter' });
@@ -18,6 +19,52 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    // ===== GET TIÊU CHÍ =====
+if (action === 'get-tieuchi') {
+  const data = await readSheet('TIEU_CHI_CHUNG');
+
+  if (!data || data.length <= 1) {
+    return res.status(200).json({});
+  }
+
+  const headers = data[0];
+  const rows = data.slice(1);
+
+  const iThang = headers.findIndex(h => h.toLowerCase() === 'thang');
+  const iMaNS = headers.findIndex(h => h.toLowerCase() === 'manhansu');
+  const iID = headers.findIndex(h => h.toLowerCase() === 'tieuchiid');
+  const iDiem = headers.findIndex(h => h.toLowerCase() === 'diem');
+
+  const result: any = {};
+
+  rows.forEach(r => {
+    if (
+      String(r[iThang]).trim() === String(thang).trim() &&
+      String(r[iMaNS]).trim() === String(maNhanSu).trim()
+    ) {
+      result[r[iID]] = r[iDiem];
+    }
+  });
+
+  return res.status(200).json(result);
+}
+
+// ===== SAVE TIÊU CHÍ =====
+if (action === 'save-tieuchi' && req.method === 'POST') {
+  const { thang, maNhanSu, data } = req.body;
+
+  const newRows = Object.keys(data).map(id => [
+    thang,
+    maNhanSu,
+    id,
+    data[id]
+  ]);
+
+  const { writeSheet } = await import('./_sheets.js');
+  await writeSheet('TIEU_CHI_CHUNG', newRows);
+
+  return res.status(200).json({ success: true });
+}
     const data = await readSheet('NHAP_LIEU');
     
     if (!data || data.length <= 1) {
