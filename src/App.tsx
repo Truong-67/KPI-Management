@@ -795,6 +795,27 @@ const handleResetThang = async () => {
 
             </tr>
           ))}
+                    ))}
+
+          <tr className="border-t border-slate-600 bg-slate-800/40">
+            <td className="p-3 text-center font-semibold"></td>
+
+            <td className="p-3 font-semibold text-white">
+              Tổng cộng
+            </td>
+
+            <td className="p-3 text-center font-semibold text-white">
+              30
+            </td>
+
+            <td className="p-3 text-center">
+              <div className="text-lg font-bold text-emerald-400">
+                {tongDiemTieuChi.toFixed(2)}
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
         </tbody>
       </table>
     </div>
