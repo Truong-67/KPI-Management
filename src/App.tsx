@@ -129,7 +129,7 @@ export default function App() {
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'kpi' | 'tieuchi'>('kpi');
+  const [activeTab, setActiveTab] = useState<'kpi' | 'tieuchi' | 'tong'>('kpi');
 
   const [diemTieuChi, setDiemTieuChi] = useState<Record<string, string>>({});
   const [tongDiem, setTongDiem] = useState(0);
