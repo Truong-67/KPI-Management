@@ -1024,7 +1024,42 @@ const handleResetThang = async () => {
           </div>
         </div>
       )}
+{activeTab === 'tong' && (
+  <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mt-6">
 
+    <h2 className="text-lg font-semibold text-white mb-4">
+      Tổng hợp KPI
+    </h2>
+
+    <div className="grid grid-cols-3 gap-4">
+
+      {/* KPI nhiệm vụ */}
+      <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-xl p-4">
+        <p className="text-sm text-slate-300">KPI nhiệm vụ (70%)</p>
+        <p className="text-2xl font-bold text-white">
+          {kpiData?.kpi?.toFixed(2) || '0.00'}
+        </p>
+      </div>
+
+      {/* Tiêu chí chung */}
+      <div className="bg-emerald-600/20 border border-emerald-500/30 rounded-xl p-4">
+        <p className="text-sm text-slate-300">Tiêu chí chung</p>
+        <p className="text-2xl font-bold text-white">
+          {tongTieuChi.toFixed(2)}
+        </p>
+      </div>
+
+      {/* Tổng */}
+      <div className="bg-purple-600/20 border border-purple-500/30 rounded-xl p-4">
+        <p className="text-sm text-slate-300">Tổng điểm (100)</p>
+        <p className="text-3xl font-bold text-white">
+          {tongDiem.toFixed(2)}
+        </p>
+      </div>
+
+    </div>
+  </div>
+)}
       </div>
     </div>
   );
