@@ -132,6 +132,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'kpi' | 'tieuchi'>('kpi');
 
   const [diemTieuChi, setDiemTieuChi] = useState<Record<string, string>>({});
+  const [tongDiem, setTongDiem] = useState(0);
+  const [tongTieuChi, setTongTieuChi] = useState(0);
   const currentYear = new Date().getFullYear();
   const isPhuTrachMode = maNhanSu === PHU_TRACH_VALUE;
 
