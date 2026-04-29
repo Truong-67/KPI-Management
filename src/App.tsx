@@ -741,6 +741,7 @@ const handleResetThang = async () => {
         )}
 
         {/* Input Form */}
+        {activeTab === 'kpi' && (
         <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-5 border-b border-slate-800 bg-slate-900/80">
             <h2 className="text-lg font-semibold text-white">Nhập số liệu nhiệm vụ</h2>
@@ -844,6 +845,7 @@ const handleResetThang = async () => {
             </table>
           </div>
         </div>
+      )}
 
       </div>
     </div>
