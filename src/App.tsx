@@ -173,6 +173,17 @@ export default function App() {
   useEffect(() => {
     if (thang) {
       const apiThang = toYYYYMM(thang);
+      // ===== LOAD TIÊU CHÍ =====
+    if (maNhanSu) {
+      fetch(`/api/get-tieuchi?thang=${thang}&maNhanSu=${maNhanSu}`)
+        .then(res => res.json())
+        .then(data => {
+          setDiemTieuChi(data || {});
+        })
+        .catch(err => console.error('Lỗi load tiêu chí:', err));
+    }
+
+    // ===== KPI PHỤ TRÁCH =====
       fetch(`/api/kpi-phutrach?thang=${apiThang}`)
         .then(res => res.json())
         .then(data => {
