@@ -855,7 +855,15 @@ const handleResetThang = async () => {
         </tbody>
        </table>
     </div>
-
+{/* ===== NÚT LƯU TIÊU CHÍ ===== */}
+<div className="p-4 flex justify-end">
+  <button
+    onClick={handleSaveTieuChi}
+    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg"
+  >
+    Lưu tiêu chí
+  </button>
+</div>
   </div>
 )}
         {/* Input Form */}
