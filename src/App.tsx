@@ -116,6 +116,7 @@ export default function App() {
   const [nhiemVu, setNhiemVu] = useState<any[]>([]);
   const [edits, setEdits] = useState<Record<string, any>>({});
   const [kpiData, setKpiData] = useState<{a: number, b: number, c: number, kpi: number} | null>(null);
+  const [tieuChiData, setTieuChiData] = useState<Record<string, any>>({});
   const [kpiPhuTrachData, setKpiPhuTrachData] = useState<{a: number, b: number, c: number, d: number, dd: number, e: number, kpi: number} | null>(null);
 
   const [ptInputs, setPtInputs] = useState<{ d: string; dd: string; e: string }>({
