@@ -489,7 +489,29 @@ const handleResetThang = async () => {
             </div>
             <h1 className="text-xl font-bold text-white tracking-wide">KPI Management</h1>
           </div>
+          <div className="flex gap-2 mb-4">
+  <button
+    onClick={() => setActiveTab('kpi')}
+    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+      activeTab === 'kpi'
+        ? 'bg-indigo-600 text-white'
+        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+    }`}
+  >
+    KPI
+  </button>
 
+  <button
+    onClick={() => setActiveTab('tieuchi')}
+    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+      activeTab === 'tieuchi'
+        ? 'bg-indigo-600 text-white'
+        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+    }`}
+  >
+    Đánh giá tiêu chí
+  </button>
+</div>
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2">
               <Calendar className="w-4 h-4 text-slate-400 mr-2" />
