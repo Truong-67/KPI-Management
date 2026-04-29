@@ -8,9 +8,9 @@ export default async function handler(req: any, res: any) {
   let { thang, maNhanSu } = req.query;
   const action = req.query.action;
 
-  if (!thang || !maNhanSu) {
-    return res.status(400).json({ error: 'Missing thang or maNhanSu parameter' });
-  }
+  if (!thang) {
+  return res.status(400).json({ error: 'Missing thang' });
+}
 
   // ✅ FIX FORMAT
   if (thang.includes('-')) {
@@ -53,12 +53,12 @@ if (action === 'get-tieuchi') {
 if (action === 'save-tieuchi' && req.method === 'POST') {
   const { thang: thangBody, maNhanSu: maNSBody, data } = req.body;
 
-  const newRows = Object.keys(data).map(id => [
-    thangBody,
-    maNSBody,
-    id,
-    data[id]
-  ]);
+  const newRows = data.map((item: any) => [
+  thangBody,
+  maNSBody,
+  item.id,
+  item.diem
+]);
 
   const { writeSheet } = await import('./_sheets.js');
   await writeSheet('TIEU_CHI_CHUNG', newRows);
