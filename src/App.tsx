@@ -739,7 +739,65 @@ const handleResetThang = async () => {
             </div>
           </div>
         )}
+        {activeTab === 'tieuchi' && (
+  <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
 
+    <div className="p-5 border-b border-slate-800 bg-slate-900/80">
+      <h2 className="text-lg font-semibold text-white">
+        KẾT QUẢ THEO DÕI - ĐÁNH GIÁ THEO TIÊU CHÍ CHUNG
+      </h2>
+    </div>
+
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr className="bg-slate-800/50 text-slate-400 uppercase">
+            <th className="p-3">TT</th>
+            <th className="p-3">Tiêu chí</th>
+            <th className="p-3 text-center">Điểm tối đa</th>
+            <th className="p-3 text-center">Điểm tự chấm</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {TIEU_CHI_CHUNG.map(tc => (
+            <tr key={tc.id} className="border-t border-slate-800">
+
+              <td className="p-3 text-center">{tc.tt}</td>
+
+              <td className={`p-3 ${tc.isGroup ? 'font-semibold text-white' : 'pl-6 text-slate-300'}`}>
+                {tc.noiDung}
+              </td>
+
+              <td className="p-3 text-center">{tc.diemToiDa}</td>
+
+              <td className="p-3 text-center">
+                {!tc.isGroup && (
+                  <input
+                    type="number"
+                    min="0"
+                    max={tc.diemToiDa}
+                    step="0.5"
+                    className="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-center"
+                    value={diemTieuChi[tc.id] || ''}
+                    onChange={(e) =>
+                      setDiemTieuChi(prev => ({
+                        ...prev,
+                        [tc.id]: e.target.value
+                      }))
+                    }
+                  />
+                )}
+              </td>
+
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+)}
         {/* Input Form */}
         {activeTab === 'kpi' && (
         <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
