@@ -128,7 +128,9 @@ export default function App() {
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'kpi' | 'tieuchi'>('kpi');
 
+  const [diemTieuChi, setDiemTieuChi] = useState<Record<string, string>>({});
   const currentYear = new Date().getFullYear();
   const isPhuTrachMode = maNhanSu === PHU_TRACH_VALUE;
 
