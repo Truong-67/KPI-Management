@@ -795,8 +795,7 @@ const handleResetThang = async () => {
 
             </tr>
           ))}
-                    ))}
-
+          
           <tr className="border-t border-slate-600 bg-slate-800/40">
             <td className="p-3 text-center font-semibold"></td>
 
@@ -816,8 +815,7 @@ const handleResetThang = async () => {
           </tr>
 
         </tbody>
-        </tbody>
-      </table>
+       </table>
     </div>
 
   </div>
