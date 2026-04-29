@@ -841,7 +841,7 @@ const handleResetThang = async () => {
                     max={tc.diemToiDa}
                     step="0.5"
                     className="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-center"
-                    value={diemTieuChi[tc.id] || ''}
+                     value={diemTieuChi[tc.id] ?? ''}
                     onChange={(e) =>
                       setDiemTieuChi(prev => ({
                         ...prev,
