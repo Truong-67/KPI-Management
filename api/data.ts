@@ -71,13 +71,16 @@ export default async function handler(req: any, res: any) {
         oldRows = oldData.slice(1);
       }
 
-      // ❌ Xóa dữ liệu cũ cùng tháng + nhân sự
       const filteredOld = oldRows.filter(r => {
-        return !(
-          String(r[0]).trim() === String(thangBody).trim() &&
-          String(r[1]).trim() === String(maNSBody).trim()
-        );
-      });
+  // ❌ loại bỏ dòng header bị lặp
+  if (String(r[0]).toLowerCase().trim() === 'thang') return false;
+
+  // ❌ loại bỏ dữ liệu cùng tháng + nhân sự
+  return !(
+    String(r[0]).trim() === String(thangBody).trim() &&
+    String(r[1]).trim() === String(maNSBody).trim()
+  );
+});
 
       // ✅ Tạo dữ liệu mới
       const newRows = data.map((item: any) => [
