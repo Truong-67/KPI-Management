@@ -204,7 +204,23 @@ export default function App() {
       setPtInputs({ d: '', dd: '', e: '' });
     }
   }, [thang]);
+// ===== LOAD TIÊU CHÍ (ĐÚNG CHUẨN) =====
+useEffect(() => {
+  if (!thang || !maNhanSu) return;
 
+  const apiThang = toYYYYMM(thang);
+
+  fetch(`/api/data?action=get-tieuchi&thang=${apiThang}&maNhanSu=${maNhanSu}`)
+    .then(res => res.json())
+    .then(tc => {
+      setDiemTieuChi(tc || {});
+    })
+    .catch(err => {
+      console.error('Lỗi tải tiêu chí:', err);
+      setDiemTieuChi({});
+    });
+
+}, [thang, maNhanSu]);
   const loadNhiemVu = async (t: string, m: string) => {
     const apiThang = toYYYYMM(t);
     const res = await fetch(`/api/nhiemvu?thang=${apiThang}&maNhanSu=${m}`);
