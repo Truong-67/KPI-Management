@@ -601,7 +601,7 @@ const handleResetThang = async () => {
         )}
 
         {/* KPI Cards */}
-        {kpiData && (
+        {activeTab === 'kpi' && kpiData && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card a */}
             <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/10 border border-blue-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
