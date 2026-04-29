@@ -579,6 +579,17 @@ const handleResetThang = async () => {
   >
     Đánh giá tiêu chí
   </button>
+            
+    <button
+  onClick={() => setActiveTab('tong')}
+  className={`px-4 py-2 rounded-lg text-sm font-medium ${
+    activeTab === 'tong'
+      ? 'bg-indigo-600 text-white'
+      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+  }`}
+>
+  Tổng điểm
+</button>
 </div>
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2">
