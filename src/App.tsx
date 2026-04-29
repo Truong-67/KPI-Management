@@ -174,16 +174,7 @@ export default function App() {
   useEffect(() => {
     if (thang) {
       const apiThang = toYYYYMM(thang);
-      // ===== LOAD TIÊU CHÍ =====
-    if (maNhanSu) {
-      fetch(`/api/get-tieuchi?thang=${thang}&maNhanSu=${maNhanSu}`)
-        .then(res => res.json())
-        .then(data => {
-          setDiemTieuChi(data || {});
-        })
-        .catch(err => console.error('Lỗi load tiêu chí:', err));
-    }
-
+      
     // ===== KPI PHỤ TRÁCH =====
       fetch(`/api/kpi-phutrach?thang=${apiThang}`)
         .then(res => res.json())
@@ -205,15 +196,7 @@ export default function App() {
             dd: String(mapped.dd ?? 0),
             e: String(mapped.e ?? 0)
           });
-          // ===== LOAD TIÊU CHÍ =====
-    if (maNhanSu) {
-      fetch(`/api/data?action=get-tieuchi&thang=${thang}&maNhanSu=${maNhanSu}`)
-        .then(res => res.json())
-        .then(tc => {
-          setDiemTieuChi(tc || {});
-        })
-        .catch(() => setDiemTieuChi({}));
-    }
+          
         })
         .catch(err => console.error('Lỗi khi tải KPI phụ trách:', err));
     } else {
