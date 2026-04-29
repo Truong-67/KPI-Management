@@ -211,7 +211,13 @@ useEffect(() => {
   const apiThang = toYYYYMM(thang);
 
   fetch(`/api/data?action=get-tieuchi&thang=${apiThang}&maNhanSu=${maNhanSu}`)
-    .then(res => res.json())
+  .then(async res => {
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text);
+    }
+    return res.json();
+  })
     .then(tc => {
       setDiemTieuChi(tc || {});
     })
