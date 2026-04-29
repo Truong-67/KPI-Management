@@ -477,6 +477,44 @@ const handleResetThang = async () => {
     setLoading(false);
   }
 };
+  const handleSaveTieuChi = async () => {
+  if (!thang || !maNhanSu) {
+    alert('Chọn tháng và nhân sự trước');
+    return;
+  }
+
+  setSaving(true);
+  setError('');
+  setSuccessMsg('');
+
+  try {
+    const payload = Object.keys(diemTieuChi).map(id => ({
+      id,
+      diem: parseFloat(diemTieuChi[id]) || 0
+    }));
+
+    const res = await fetch('/api/save-tieuchi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        thang,
+        maNhanSu,
+        data: payload
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+
+    setSuccessMsg('Đã lưu điểm tiêu chí');
+
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setSaving(false);
+  }
+};
   const tongDiemTieuChi = Object.keys(diemTieuChi).reduce((sum, key) => {
   return sum + (parseFloat(diemTieuChi[key]) || 0);
 }, 0);
