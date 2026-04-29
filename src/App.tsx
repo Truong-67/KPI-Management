@@ -112,7 +112,11 @@ export default function App() {
   const [nhanSuList, setNhanSuList] = useState<any[]>([]);
   const [thang, setThang] = useState<string>(''); // Stores "MM/YYYY"
   const [maNhanSu, setMaNhanSu] = useState<string>('');
-  
+  const currentUser = nhanSuList.find(ns => ns.MaNhanSu === maNhanSu);
+
+  const isLanhDao =
+  currentUser?.ChucVu === 'Trưởng phòng' ||
+  currentUser?.ChucVu === 'Phó phòng';
   const [nhiemVu, setNhiemVu] = useState<any[]>([]);
   const [edits, setEdits] = useState<Record<string, any>>({});
   const [kpiData, setKpiData] = useState<{a: number, b: number, c: number, kpi: number} | null>(null);
