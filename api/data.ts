@@ -51,11 +51,11 @@ if (action === 'get-tieuchi') {
 
 // ===== SAVE TIÊU CHÍ =====
 if (action === 'save-tieuchi' && req.method === 'POST') {
-  const { thang, maNhanSu, data } = req.body;
+  const { thang: thangBody, maNhanSu: maNSBody, data } = req.body;
 
   const newRows = Object.keys(data).map(id => [
-    thang,
-    maNhanSu,
+    thangBody,
+    maNSBody,
     id,
     data[id]
   ]);
