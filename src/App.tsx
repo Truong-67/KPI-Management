@@ -1001,7 +1001,7 @@ const handleResetThang = async () => {
         </div>
       )}
 {activeTab === 'tong' && (
-  <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mt-6">
+  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mt-6">
 
     <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
       Tổng hợp KPI
