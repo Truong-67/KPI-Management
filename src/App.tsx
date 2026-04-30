@@ -735,7 +735,50 @@ const handleResetThang = async () => {
             </div>
           </div>
         )}
-        
+        {isLanhDao && (
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+
+    {/* d */}
+    <div className="bg-gradient-to-br from-indigo-900/40 to-indigo-800/10 border border-indigo-700/40 rounded-2xl p-5 shadow-lg">
+      <p className="text-indigo-300 text-sm mb-2">d – Kết quả lĩnh vực</p>
+      <input
+        type="number"
+        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-center"
+        value={ptInputs.d}
+        onChange={(e) =>
+          setPtInputs(prev => ({ ...prev, d: e.target.value }))
+        }
+      />
+    </div>
+
+    {/* đ */}
+    <div className="bg-gradient-to-br from-indigo-900/40 to-indigo-800/10 border border-indigo-700/40 rounded-2xl p-5 shadow-lg">
+      <p className="text-indigo-300 text-sm mb-2">đ – Tổ chức triển khai</p>
+      <input
+        type="number"
+        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-center"
+        value={ptInputs.dd}
+        onChange={(e) =>
+          setPtInputs(prev => ({ ...prev, dd: e.target.value }))
+        }
+      />
+    </div>
+
+    {/* e */}
+    <div className="bg-gradient-to-br from-indigo-900/40 to-indigo-800/10 border border-indigo-700/40 rounded-2xl p-5 shadow-lg">
+      <p className="text-indigo-300 text-sm mb-2">e – Đoàn kết nội bộ</p>
+      <input
+        type="number"
+        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-center"
+        value={ptInputs.e}
+        onChange={(e) =>
+          setPtInputs(prev => ({ ...prev, e: e.target.value }))
+        }
+      />
+    </div>
+
+  </div>
+)}
         {activeTab === 'tieuchi' && (
   <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
 
