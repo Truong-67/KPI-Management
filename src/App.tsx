@@ -616,7 +616,7 @@ const handleResetThang = async () => {
 </button>
 </div>
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2">
+            <div className="flex items-center bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2">
               <Calendar className="w-4 h-4 text-slate-400 mr-2" />
               <select 
                 className="bg-transparent border-none outline-none text-sm text-white appearance-none pr-4 cursor-pointer" 
@@ -634,7 +634,7 @@ const handleResetThang = async () => {
               </select>
             </div>
 
-            <div className="flex items-center bg-slate-800/50 border border-slate-700 rounded-xl px-3 py-2">
+            <div className="flex items-center bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2">
               <User className="w-4 h-4 text-slate-400 mr-2" />
               <select 
                 className="bg-transparent border-none outline-none text-sm text-white appearance-none pr-4 cursor-pointer max-w-[200px] truncate" 
