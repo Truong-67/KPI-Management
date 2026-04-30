@@ -570,7 +570,7 @@ const handleResetThang = async () => {
   return sum + (parseFloat(diemTieuChi[key]) || 0);
 }, 0);
   return (
-    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-200 font-sans p-4 md:p-8">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-700 dark:text-slate-200 font-sans p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
@@ -947,7 +947,7 @@ const handleResetThang = async () => {
                     return (
                       <tr key={keyNhap || idx} className="hover:bg-slate-800/30 transition-colors">
                         <td className="p-4">
-                          <div className="text-sm text-slate-200 font-medium mb-2">{tenNv}</div>
+                          <div className="text-sm text-slate-700 dark:text-slate-200 font-medium mb-2">{tenNv}</div>
                           <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
                             <div 
                               className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
