@@ -370,7 +370,17 @@ useEffect(() => {
       if (!res.ok) {
         throw new Error(data.error || 'Lỗi khi lưu dữ liệu');
       }
-
+      await fetch('/api/save-phutrach', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    thang: thang,
+    maNhanSu: maNhanSu,
+    d: Number(ptInputs.d) || 0,
+    dd: Number(ptInputs.dd) || 0,
+    e: Number(ptInputs.e) || 0
+  })
+});
       setSuccessMsg('Lưu dữ liệu thành công!');
       
       // Cập nhật lại KPI cá nhân
