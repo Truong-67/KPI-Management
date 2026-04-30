@@ -121,7 +121,7 @@ export default function App() {
   const [kpiData, setKpiData] = useState<{a: number, b: number, c: number, kpi: number} | null>(null);
   const [tieuChiData, setTieuChiData] = useState<Record<string, any>>({});
   const [kpiPhuTrachData, setKpiPhuTrachData] = useState<{a: number, b: number, c: number, d: number, dd: number, e: number, kpi: number} | null>(null);
-
+  const dataABC = isLanhDao ? kpiPhuTrachData : kpiData;
   const [ptInputs, setPtInputs] = useState<{ d: string; dd: string; e: string }>({
     d: '',
     dd: '',
