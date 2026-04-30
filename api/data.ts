@@ -46,67 +46,64 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json(result);
     }
 
-    // ==================================================
-    // ===== SAVE TIÊU CHÍ (UPSERT CHUẨN) ================
-    // ==================================================
     if (action === 'save-tieuchi' && req.method === 'POST') {
 
-      let { thang: thangBody, maNhanSu: maNSBody, data } = req.body;
+  let { thang: thangBody, maNhanSu: maNSBody, data } = req.body;
 
-      if (!thangBody || !maNSBody || !Array.isArray(data)) {
-        return res.status(400).json({ error: 'Missing or invalid data' });
-      }
+  if (!thangBody || !maNSBody || !Array.isArray(data)) {
+    return res.status(400).json({ error: 'Missing or invalid data' });
+  }
 
-      // chuẩn hóa tháng
-      if (thangBody.includes('-')) {
-        const [yyyy, mm] = thangBody.split('-');
-        thangBody = `${mm}/${yyyy}`;
-      }
+  // chuẩn hóa tháng
+  if (thangBody.includes('-')) {
+    const [yyyy, mm] = thangBody.split('-');
+    thangBody = `${mm}/${yyyy}`;
+  }
 
-      let sheet = await readSheet('TIEU_CHI_CHUNG');
+  const oldData = await readSheet('TIEU_CHI_CHUNG');
 
-      // 👉 nếu chưa có sheet → tạo header
-      if (!sheet || sheet.length === 0) {
-        await updateSheet('TIEU_CHI_CHUNG', 'A1:D1', [[
-          'Thang', 'MaNhanSu', 'TieuChiID', 'Diem'
-        ]]);
+  let headers = ['Thang', 'MaNhanSu', 'TieuChiID', 'Diem'];
+  let oldRows: any[] = [];
 
-        sheet = [['Thang', 'MaNhanSu', 'TieuChiID', 'Diem']];
-      }
+  if (oldData && oldData.length > 0) {
+    headers = oldData[0];
+    oldRows = oldData.slice(1);
+  }
 
-      const rows = sheet.slice(1);
+  // 🔥 LỌC BỎ:
+  // 1. header bị lặp
+  // 2. dữ liệu cùng tháng + nhân sự
+  const filtered = oldRows.filter(r => {
+    if (String(r[0]).toLowerCase().trim() === 'thang') return false;
 
-      for (const item of data) {
-        const tcId = item.id;
-        const diem = Number(item.diem) || 0;
+    return !(
+      String(r[0]).trim() === thangBody &&
+      String(r[1]).trim() === maNSBody
+    );
+  });
 
-        let rowIndex = -1;
+  // 🔥 TẠO DATA MỚI
+  const newRows = data.map((item: any) => [
+    thangBody,
+    maNSBody,
+    item.id,
+    Number(item.diem) || 0
+  ]);
 
-        rows.forEach((r: any[], idx: number) => {
-          if (
-            String(r[0]).trim() === thangBody &&
-            String(r[1]).trim() === maNSBody &&
-            String(r[2]).trim() === tcId
-          ) {
-            rowIndex = idx + 2;
-          }
-        });
+  const finalData = [
+    headers,
+    ...filtered,
+    ...newRows
+  ];
 
-        const newRow = [thangBody, maNSBody, tcId, diem];
+  await updateSheet(
+    'TIEU_CHI_CHUNG',
+    `A1:D${finalData.length}`,
+    finalData
+  );
 
-        if (rowIndex === -1) {
-          rowIndex = rows.length + 2;
-        }
-
-        await updateSheet(
-          'TIEU_CHI_CHUNG',
-          `A${rowIndex}:D${rowIndex}`,
-          [newRow]
-        );
-      }
-
-      return res.status(200).json({ success: true });
-    }
+  return res.status(200).json({ success: true });
+}
 
     // ==================================================
     // ===== LOAD NHẬP LIỆU ==============================
