@@ -574,7 +574,7 @@ const handleResetThang = async () => {
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between shadow-lg">
+        <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between shadow-lg">
           <div className="flex items-center gap-3 mb-4 md:mb-0">
             <div className="p-2 bg-indigo-500/20 rounded-lg">
               <Activity className="w-6 h-6 text-indigo-400" />
@@ -772,7 +772,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">d – Kết quả lĩnh vực</p>
       <input
         type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
+        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.d}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, d: e.target.value }))
@@ -785,7 +785,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">đ – Tổ chức triển khai</p>
       <input
         type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
+        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.dd}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, dd: e.target.value }))
@@ -798,7 +798,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">e – Đoàn kết nội bộ</p>
       <input
         type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
+        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.e}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, e: e.target.value }))
@@ -809,9 +809,9 @@ const handleResetThang = async () => {
   </div>
 )}
         {activeTab === 'tieuchi' && (
-  <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
+  <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
 
-    <div className="p-5 border-b border-slate-800 bg-slate-900/80">
+    <div className="p-5 border-b border-slate-800 bg-slate-100 dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/80">
       <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
         KẾT QUẢ THEO DÕI - ĐÁNH GIÁ THEO TIÊU CHÍ CHUNG
       </h2>
@@ -896,8 +896,8 @@ const handleResetThang = async () => {
 )}
         {/* Input Form */}
         {activeTab === 'kpi' && (
-        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="p-5 border-b border-slate-800 bg-slate-900/80">
+        <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-slate-800 bg-slate-100 dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/80">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Nhập số liệu nhiệm vụ</h2>
           </div>
           <div className="overflow-x-auto">
@@ -1001,7 +1001,7 @@ const handleResetThang = async () => {
         </div>
       )}
 {activeTab === 'tong' && (
-  <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mt-6">
+  <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mt-6">
 
     <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
       Tổng hợp KPI
