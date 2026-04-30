@@ -691,7 +691,7 @@ const handleResetThang = async () => {
               className="
                 flex items-center gap-2
                 bg-white text-slate-900
-                dark:bg-slate-800/50 dark:text-slate-900 dark:text-white
+                dark:bg-slate-800/50 dark:text-white
                 border border-slate-300 dark:border-slate-700
                 rounded-xl px-3 py-2 text-sm font-medium
                 hover:bg-slate-100 dark:hover:bg-slate-700
