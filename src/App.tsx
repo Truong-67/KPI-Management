@@ -109,6 +109,7 @@ const TIEU_CHI_CHUNG: TieuChiItem[] = [
 ];
 export default function App() {
   const [nhanSuList, setNhanSuList] = useState<any[]>([]);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [thang, setThang] = useState<string>(''); // Stores "MM/YYYY"
   const [maNhanSu, setMaNhanSu] = useState<string>('');
   const currentUser = nhanSuList.find(ns => ns.MaNhanSu === maNhanSu);
