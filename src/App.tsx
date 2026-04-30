@@ -182,7 +182,7 @@ export default function App() {
       const apiThang = toYYYYMM(thang);
       
     // ===== KPI PHỤ TRÁCH =====
-      fetch(`/api/kpi-phutrach?thang=${apiThang}`)
+      fetch(`/api/kpi-phutrach?thang=${apiThang}&maNhanSu=${maNhanSu}`)
         .then(res => res.json())
         .then(data => {
           const mapped = {
