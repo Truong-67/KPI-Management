@@ -5,13 +5,18 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  let { thang } = req.query;
+  let { thang, maNhanSu } = req.query;
 
-  // Convert MM/YYYY → YYYY-MM
-  // Chuẩn hoá về MM/YYYY
-  if (thang && thang.includes('-')) {
-  const [yyyy, mm] = thang.split('-');
-  thang = `${mm}/${yyyy}`;
+  if (!thang || !maNhanSu) {
+    return res.status(400).json({ error: 'Missing thang or maNhanSu' });
+  }
+
+  // =========================
+  // FORMAT THÁNG
+  // =========================
+  if (thang.includes('-')) {
+    const [yyyy, mm] = thang.split('-');
+    thang = `${mm}/${yyyy}`;
   }
 
   try {
@@ -36,7 +41,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // =====================================================
-    // 2. TÍNH a, b, c (THEO QUY ĐỔI)
+    // 2. TÍNH a, b, c (THEO CÁ NHÂN)
     // =====================================================
     const nhapLieuData = await readSheet('NHAP_LIEU');
 
@@ -46,6 +51,7 @@ export default async function handler(req: any, res: any) {
       const headers = nhapLieuData[0].map((h: string) => h.toLowerCase());
 
       const thangIdx = headers.indexOf('thang');
+      const maNSIdx = headers.indexOf('manhansu');
       const maNvIdx = headers.indexOf('manhiemvu');
       const soGiaoIdx = headers.indexOf('sogiao');
       const soHTIdx = headers.indexOf('sohoanthanh');
@@ -61,7 +67,9 @@ export default async function handler(req: any, res: any) {
 
       rows.forEach((r: any[]) => {
         if (!r || r.length === 0) return;
+
         if (String(r[thangIdx]).trim() !== String(thang).trim()) return;
+        if (String(r[maNSIdx]).trim() !== String(maNhanSu).trim()) return;
 
         const maNV = r[maNvIdx];
         const heSo = heSoMap[maNV] || 0;
@@ -73,24 +81,21 @@ export default async function handler(req: any, res: any) {
 
         if (giao <= 0) return;
 
-        // =========================
-        // QUY ĐỔI
-        // =========================
         const giaoQD = giao * heSo;
         const htQD = ht * heSo;
 
-        const clQD = htQD - (loi * heSo * 0.25);
-        const tdQD = htQD - (cham * heSo * 0.25);
+        let clQD = htQD - (loi * heSo * 0.25);
+        if (clQD < 0) clQD = 0;
+
+        let tdQD = htQD - (cham * heSo * 0.25);
+        if (tdQD < 0) tdQD = 0;
 
         sumGiaoQD += giaoQD;
         sumHTQD += htQD;
-        sumCLQD += (clQD > 0 ? clQD : 0);
-        sumTDQD += (tdQD > 0 ? tdQD : 0);
+        sumCLQD += clQD;
+        sumTDQD += tdQD;
       });
 
-      // =========================
-      // TÍNH a, b, c
-      // =========================
       if (sumGiaoQD > 0) {
         a = (sumHTQD / sumGiaoQD) * 100;
         b = (sumCLQD / sumGiaoQD) * 100;
@@ -99,27 +104,26 @@ export default async function handler(req: any, res: any) {
     }
 
     // =====================================================
-    // 3. LẤY d, đ, e
+    // 3. LẤY d, đ, e THEO NGƯỜI
     // =====================================================
-    const diemPtData = await readSheet('NHAP_DIEM_PHU_TRACH');
+    const diemData = await readSheet('NHAP_DIEM_PHU_TRACH');
 
     let d = 0, dd = 0, e = 0;
 
-    if (diemPtData && diemPtData.length > 1) {
-      const headersRaw = diemPtData[0];
-      const headers = headersRaw.map((h: string) => h.trim().toLowerCase());
+    if (diemData && diemData.length > 1) {
+      const headers = diemData[0].map((h: string) => h.toLowerCase());
 
-      const thangIdx = headers.findIndex(h => h === 'thang');
+      const thangIdx = headers.indexOf('thang');
+      const maNSIdx = headers.indexOf('manhansu');
+      const dIdx = headers.findIndex(h => h === 'd');
+      const ddIdx = headers.findIndex(h => h === 'đ' || h === 'dd');
+      const eIdx = headers.findIndex(h => h === 'e');
 
-      // ⚠️ FIX CỨNG - KHÔNG DÙNG includes CHUNG CHUNG
-      const dIdx = headers.findIndex(h => h === 'd' || h === 'diemd');
-      const ddIdx = headers.findIndex(h => h === 'đ' || h === 'diemđ' || h === 'diemdd');
-      const eIdx = headers.findIndex(h => h === 'e' || h === 'dieme');
-
-      const rows = diemPtData.slice(1);
+      const rows = diemData.slice(1);
 
       const found = rows.find(r =>
-        String(r[thangIdx]).trim() === String(thang).trim()
+        String(r[thangIdx]).trim() === String(thang).trim() &&
+        String(r[maNSIdx]).trim() === String(maNhanSu).trim()
       );
 
       if (found) {
@@ -130,9 +134,36 @@ export default async function handler(req: any, res: any) {
     }
 
     // =====================================================
-    // 4. KPI PHỤ TRÁCH
+    // 4. KPI THEO CHỨC VỤ
     // =====================================================
-    const kpi = ((a + b + c + d + dd + e) / 6) * 70 / 100;
+    const nhanSu = await readSheet('DM_NHAN_SU');
+
+    let isLanhDao = false;
+
+    if (nhanSu && nhanSu.length > 1) {
+      const headers = nhanSu[0].map((h: string) => h.toLowerCase());
+      const maIdx = headers.indexOf('manhansu');
+      const cvIdx = headers.indexOf('chucvu');
+
+      const found = nhanSu.slice(1).find(r =>
+        String(r[maIdx]).trim() === String(maNhanSu).trim()
+      );
+
+      if (found) {
+        const cv = String(found[cvIdx]).toLowerCase();
+        isLanhDao = cv.includes('trưởng') || cv.includes('phó');
+      }
+    }
+
+    let kpi = 0;
+
+    if (isLanhDao) {
+      // lãnh đạo
+      kpi = ((a + b + c + d + dd + e) / 6) * 70 / 100;
+    } else {
+      // cán bộ
+      kpi = ((a + b + c) / 3) * 70 / 100;
+    }
 
     return res.status(200).json({
       a,
@@ -145,7 +176,7 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (error: any) {
-    console.error('Error KPI_PHU_TRACH:', error);
+    console.error('ERROR KPI:', error);
     return res.status(500).json({ error: error.message });
   }
 }
