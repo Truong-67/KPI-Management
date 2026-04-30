@@ -1,4 +1,4 @@
-import { readSheet, writeSheet } from './_sheets.js';
+import { readSheet, appendRow, updateRow } from './_sheets.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -12,59 +12,56 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Missing data' });
     }
 
-    // ===== FORMAT THÁNG =====
+    // chuẩn hóa tháng
     if (thang.includes('-')) {
       const [yyyy, mm] = thang.split('-');
       thang = `${mm}/${yyyy}`;
     }
 
-    // ===== PARSE SỐ =====
-    a = Number(a) || 0;
-    b = Number(b) || 0;
-    c = Number(c) || 0;
-    d = Number(d) || 0;
-    dd = Number(dd) || 0;
-    e = Number(e) || 0;
-    kpi = Number(kpi) || 0;
-
-    // ===== ĐỌC SHEET =====
-    let data = await readSheet('KPI_LUU_TRU');
-
-    if (!data || data.length === 0) {
-      data = [['Thang','MaNhanSu','HoTen','a','b','c','d','đ','e','KPI']];
-    }
-
+    const data = await readSheet('KPI_LUU_TRU');
     const headers = data[0];
     const rows = data.slice(1);
 
-    const h = headers.map((x: string) => x.toLowerCase());
+    const iThang = headers.findIndex(h => h.toLowerCase() === 'thang');
+    const iMaNS = headers.findIndex(h => h.toLowerCase() === 'manhansu');
 
-    const iThang = h.indexOf('thang');
-    const iMaNS = h.indexOf('manhansu');
+    let foundIndex = -1;
 
-    let found = false;
-
-    const newRows = rows.map(r => {
+    rows.forEach((r, idx) => {
       if (
-        String(r[iThang]).trim() === String(thang).trim() &&
-        String(r[iMaNS]).trim() === String(maNhanSu).trim()
+        String(r[iThang]).trim() === thang &&
+        String(r[iMaNS]).trim() === maNhanSu
       ) {
-        found = true;
-        return [thang, maNhanSu, hoTen, a, b, c, d, dd, e, kpi];
+        foundIndex = idx;
       }
-      return r;
     });
 
-    if (!found) {
-      newRows.push([thang, maNhanSu, hoTen, a, b, c, d, dd, e, kpi]);
-    }
+    const newRow = [
+      thang,
+      maNhanSu,
+      hoTen,
+      a, b, c,
+      d, dd, e,
+      kpi
+    ];
 
-    await writeSheet('KPI_LUU_TRU', [headers, ...newRows]);
+    if (foundIndex !== -1) {
+      // 🔁 UPDATE dòng cũ
+      const rowNumber = foundIndex + 2;
+
+      const range = `A${rowNumber}:J${rowNumber}`;
+
+      await updateRow('KPI_LUU_TRU', range, [newRow]);
+
+    } else {
+      // ➕ THÊM mới (KHÔNG động vào header)
+      await appendRow('KPI_LUU_TRU', newRow);
+    }
 
     return res.status(200).json({ success: true });
 
   } catch (err: any) {
-    console.error('SAVE KPI ERROR:', err);
+    console.error(err);
     return res.status(500).json({ error: err.message });
   }
 }
