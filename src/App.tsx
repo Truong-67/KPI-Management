@@ -579,14 +579,14 @@ const handleResetThang = async () => {
             <div className="p-2 bg-indigo-500/20 rounded-lg">
               <Activity className="w-6 h-6 text-indigo-400" />
             </div>
-            <h1 className="text-xl font-bold text-white tracking-wide">KPI Management</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-wide">KPI Management</h1>
           </div>
           <div className="flex gap-2 mb-4">
   <button
     onClick={() => setActiveTab('kpi')}
     className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
       activeTab === 'kpi'
-        ? 'bg-indigo-600 text-white'
+        ? 'bg-indigo-600 text-slate-900 dark:text-white'
         : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
@@ -597,7 +597,7 @@ const handleResetThang = async () => {
     onClick={() => setActiveTab('tieuchi')}
     className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
       activeTab === 'tieuchi'
-        ? 'bg-indigo-600 text-white'
+        ? 'bg-indigo-600 text-slate-900 dark:text-white'
         : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
@@ -608,7 +608,7 @@ const handleResetThang = async () => {
   onClick={() => setActiveTab('tong')}
   className={`px-4 py-2 rounded-lg text-sm font-medium ${
     activeTab === 'tong'
-      ? 'bg-indigo-600 text-white'
+      ? 'bg-indigo-600 text-slate-900 dark:text-white'
       : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
   }`}
 >
@@ -619,7 +619,7 @@ const handleResetThang = async () => {
             <div className="flex items-center bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2">
               <Calendar className="w-4 h-4 text-slate-400 mr-2" />
               <select 
-                className="bg-transparent border-none outline-none text-sm text-white appearance-none pr-4 cursor-pointer" 
+                className="bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white appearance-none pr-4 cursor-pointer" 
                 value={thang} 
                 onChange={handleThangChange}
               >
@@ -637,7 +637,7 @@ const handleResetThang = async () => {
             <div className="flex items-center bg-white dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2">
               <User className="w-4 h-4 text-slate-400 mr-2" />
               <select 
-                className="bg-transparent border-none outline-none text-sm text-white appearance-none pr-4 cursor-pointer max-w-[200px] truncate" 
+                className="bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white appearance-none pr-4 cursor-pointer max-w-[200px] truncate" 
                 value={maNhanSu} 
                 onChange={handleNhanSuChange}
                 disabled={!thang}
@@ -661,7 +661,7 @@ const handleResetThang = async () => {
               <button
                 onClick={handleSave}
                 disabled={saving || !maNhanSu || nhiemVu.length === 0}
-                className="flex items-center bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-emerald-900/20"
+                className="flex items-center bg-emerald-600 hover:bg-emerald-500 text-slate-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-emerald-900/20"
               >
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                 Lưu
@@ -670,7 +670,7 @@ const handleResetThang = async () => {
               <button 
                 onClick={handleChotThang}
                 disabled={!thang}
-                className="flex items-center bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                className="flex items-center bg-purple-600 hover:bg-purple-500 text-slate-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
               >
                 <Award className="w-4 h-4 mr-2" />
                 Chốt
@@ -678,7 +678,7 @@ const handleResetThang = async () => {
               {/* Nút Reset */}
               <button 
                 onClick={handleResetThang}
-                className="flex items-center bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                className="flex items-center bg-red-600 hover:bg-red-500 text-slate-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 <AlertCircle className="w-4 h-4 mr-2" />
                 Reset
@@ -691,7 +691,7 @@ const handleResetThang = async () => {
               className="
                 flex items-center gap-2
                 bg-white text-slate-900
-                dark:bg-slate-800/50 dark:text-white
+                dark:bg-slate-800/50 dark:text-slate-900 dark:text-white
                 border border-slate-300 dark:border-slate-700
                 rounded-xl px-3 py-2 text-sm font-medium
                 hover:bg-slate-100 dark:hover:bg-slate-700
@@ -731,12 +731,12 @@ const handleResetThang = async () => {
         {activeTab === 'kpi' && kpiData && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card a */}
-            <div className="bg-gradient-to-br from-blue-900/40 to-blue-800/10 border border-blue-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div className="bg-white dark:bg-gradient-to-br dark:from-blue-900/40 dark:to-blue-800/10 border border-slate-200 dark:border-blue-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity">
                 <Target className="w-16 h-16 text-blue-400" />
               </div>
               <p className="text-blue-300 text-sm font-medium mb-1 relative z-10">Số lượng (a)</p>
-              <p className="text-3xl font-bold text-white relative z-10">{dataABC.a.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.a.toFixed(2)}</p>
             </div>
             {/* Card b */}
             <div className="bg-gradient-to-br from-emerald-900/40 to-emerald-800/10 border border-emerald-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
@@ -744,7 +744,7 @@ const handleResetThang = async () => {
                 <CheckCircle className="w-16 h-16 text-emerald-400" />
               </div>
               <p className="text-emerald-300 text-sm font-medium mb-1 relative z-10">Chất lượng (b)</p>
-              <p className="text-3xl font-bold text-white relative z-10">{dataABC.b.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.b.toFixed(2)}</p>
             </div>
             {/* Card c */}
             <div className="bg-gradient-to-br from-orange-900/40 to-orange-800/10 border border-orange-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
@@ -752,7 +752,7 @@ const handleResetThang = async () => {
                 <Clock className="w-16 h-16 text-orange-400" />
               </div>
               <p className="text-orange-300 text-sm font-medium mb-1 relative z-10">Tiến độ (c)</p>
-              <p className="text-3xl font-bold text-white relative z-10">{dataABC.c.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.c.toFixed(2)}</p>
             </div>
             {/* Card KPI */}
             <div className="bg-gradient-to-br from-purple-900/60 to-purple-800/20 border border-purple-700/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
@@ -760,7 +760,7 @@ const handleResetThang = async () => {
                 <Award className="w-16 h-16 text-purple-400" />
               </div>
               <p className="text-purple-300 text-sm font-medium mb-1 relative z-10">KPI 70%</p>
-              <p className="text-4xl font-bold text-white relative z-10">{dataABC.kpi.toFixed(2)}</p>
+              <p className="text-4xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.kpi.toFixed(2)}</p>
             </div>
           </div>
         )}
@@ -772,7 +772,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">d – Kết quả lĩnh vực</p>
       <input
         type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-center"
+        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.d}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, d: e.target.value }))
@@ -785,7 +785,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">đ – Tổ chức triển khai</p>
       <input
         type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-center"
+        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.dd}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, dd: e.target.value }))
@@ -798,7 +798,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">e – Đoàn kết nội bộ</p>
       <input
         type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-center"
+        className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.e}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, e: e.target.value }))
@@ -812,7 +812,7 @@ const handleResetThang = async () => {
   <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
 
     <div className="p-5 border-b border-slate-800 bg-slate-900/80">
-      <h2 className="text-lg font-semibold text-white">
+      <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
         KẾT QUẢ THEO DÕI - ĐÁNH GIÁ THEO TIÊU CHÍ CHUNG
       </h2>
     </div>
@@ -834,7 +834,7 @@ const handleResetThang = async () => {
 
               <td className="p-3 text-center">{tc.tt}</td>
 
-              <td className={`p-3 ${tc.isGroup ? 'font-semibold text-white' : 'pl-6 text-slate-300'}`}>
+              <td className={`p-3 ${tc.isGroup ? 'font-semibold text-slate-900 dark:text-white' : 'pl-6 text-slate-300'}`}>
                 {tc.noiDung}
               </td>
 
@@ -865,11 +865,11 @@ const handleResetThang = async () => {
           <tr className="border-t border-slate-600 bg-slate-800/40">
             <td className="p-3 text-center font-semibold"></td>
 
-            <td className="p-3 font-semibold text-white">
+            <td className="p-3 font-semibold text-slate-900 dark:text-white">
               Tổng cộng
             </td>
 
-            <td className="p-3 text-center font-semibold text-white">
+            <td className="p-3 text-center font-semibold text-slate-900 dark:text-white">
               30
             </td>
 
@@ -887,7 +887,7 @@ const handleResetThang = async () => {
 <div className="p-4 flex justify-end">
   <button
     onClick={handleSaveTieuChi}
-    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg"
+    className="bg-indigo-600 hover:bg-indigo-500 text-slate-900 dark:text-white px-4 py-2 rounded-lg"
   >
     Lưu tiêu chí
   </button>
@@ -898,7 +898,7 @@ const handleResetThang = async () => {
         {activeTab === 'kpi' && (
         <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-5 border-b border-slate-800 bg-slate-900/80">
-            <h2 className="text-lg font-semibold text-white">Nhập số liệu nhiệm vụ</h2>
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Nhập số liệu nhiệm vụ</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -959,7 +959,7 @@ const handleResetThang = async () => {
                           <input
                             type="number"
                             min="0"
-                            className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                            className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                             value={editSoGiao ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoGiao', e.target.value)}
                           />
@@ -968,7 +968,7 @@ const handleResetThang = async () => {
                           <input
                             type="number"
                             min="0"
-                            className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                            className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                             value={editSoHoanThanh ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoHoanThanh', e.target.value)}
                           />
@@ -977,7 +977,7 @@ const handleResetThang = async () => {
                           <input
                             type="number"
                             min="0"
-                            className={`w-20 bg-slate-800 border rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none transition-all ${hasError ? 'border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-500/5' : 'border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`}
+                            className={`w-20 bg-slate-800 border rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none transition-all ${hasError ? 'border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-500/5' : 'border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`}
                             value={editSoLoi ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoLoiChatLuong', e.target.value)}
                           />
@@ -986,7 +986,7 @@ const handleResetThang = async () => {
                           <input
                             type="number"
                             min="0"
-                            className={`w-20 bg-slate-800 border rounded-lg px-3 py-1.5 text-sm text-white text-center focus:outline-none transition-all ${hasLate ? 'border-orange-500/50 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 bg-orange-500/5' : 'border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`}
+                            className={`w-20 bg-slate-800 border rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none transition-all ${hasLate ? 'border-orange-500/50 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 bg-orange-500/5' : 'border-slate-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'}`}
                             value={editSoCham ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoCham', e.target.value)}
                           />
@@ -1003,7 +1003,7 @@ const handleResetThang = async () => {
 {activeTab === 'tong' && (
   <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 mt-6">
 
-    <h2 className="text-lg font-semibold text-white mb-4">
+    <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
       Tổng hợp KPI
     </h2>
 
@@ -1012,7 +1012,7 @@ const handleResetThang = async () => {
       {/* KPI nhiệm vụ */}
       <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-xl p-4">
         <p className="text-sm text-slate-300">KPI nhiệm vụ (70%)</p>
-        <p className="text-2xl font-bold text-white">
+        <p className="text-2xl font-bold text-slate-900 dark:text-white">
           {kpiPhuTrachData?.kpi?.toFixed(2) || '0.00'}
         </p>
       </div>
@@ -1020,7 +1020,7 @@ const handleResetThang = async () => {
       {/* Tiêu chí chung */}
       <div className="bg-emerald-600/20 border border-emerald-500/30 rounded-xl p-4">
         <p className="text-sm text-slate-300">Tiêu chí chung</p>
-        <p className="text-2xl font-bold text-white">
+        <p className="text-2xl font-bold text-slate-900 dark:text-white">
           {tongTieuChi.toFixed(2)}
         </p>
       </div>
@@ -1028,7 +1028,7 @@ const handleResetThang = async () => {
       {/* Tổng */}
       <div className="bg-purple-600/20 border border-purple-500/30 rounded-xl p-4">
         <p className="text-sm text-slate-300">Tổng điểm (100)</p>
-        <p className="text-3xl font-bold text-white">
+        <p className="text-3xl font-bold text-slate-900 dark:text-white">
           {tongDiem.toFixed(2)}
         </p>
       </div>
