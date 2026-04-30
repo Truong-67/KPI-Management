@@ -574,7 +574,7 @@ const handleResetThang = async () => {
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between shadow-lg">
+        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between shadow-lg">
           <div className="flex items-center gap-3 mb-4 md:mb-0">
             <div className="p-2 bg-indigo-500/20 rounded-lg">
               <Activity className="w-6 h-6 text-indigo-400" />
@@ -809,7 +809,7 @@ const handleResetThang = async () => {
   </div>
 )}
         {activeTab === 'tieuchi' && (
-  <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
+  <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
 
     <div className="p-5 border-b border-slate-800 bg-slate-900/80">
       <h2 className="text-lg font-semibold text-white">
@@ -896,7 +896,7 @@ const handleResetThang = async () => {
 )}
         {/* Input Form */}
         {activeTab === 'kpi' && (
-        <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-5 border-b border-slate-800 bg-slate-900/80">
             <h2 className="text-lg font-semibold text-white">Nhập số liệu nhiệm vụ</h2>
           </div>
