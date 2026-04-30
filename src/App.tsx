@@ -587,7 +587,7 @@ const handleResetThang = async () => {
     className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
       activeTab === 'kpi'
         ? 'bg-indigo-600 text-white'
-        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
     KPI
@@ -598,7 +598,7 @@ const handleResetThang = async () => {
     className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
       activeTab === 'tieuchi'
         ? 'bg-indigo-600 text-white'
-        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
     Đánh giá tiêu chí
@@ -609,7 +609,7 @@ const handleResetThang = async () => {
   className={`px-4 py-2 rounded-lg text-sm font-medium ${
     activeTab === 'tong'
       ? 'bg-indigo-600 text-white'
-      : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
   }`}
 >
   Tổng điểm
