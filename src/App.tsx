@@ -138,7 +138,6 @@ export default function App() {
   const [tongDiem, setTongDiem] = useState(0);
   const [tongTieuChi, setTongTieuChi] = useState(0);
   const currentYear = new Date().getFullYear();
-  const isPhuTrachMode = maNhanSu === PHU_TRACH_VALUE;
 
   // 1. Load danh sách nhân sự khi khởi tạo
   useEffect(() => {
