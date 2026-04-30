@@ -570,7 +570,7 @@ const handleResetThang = async () => {
   return sum + (parseFloat(diemTieuChi[key]) || 0);
 }, 0);
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans p-4 md:p-8">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-200 font-sans p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
