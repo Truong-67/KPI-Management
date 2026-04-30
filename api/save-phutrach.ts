@@ -1,4 +1,4 @@
-import { readSheet, writeSheet } from './_sheets.js';
+import { readSheet, updateSheet } from './_sheets.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -12,91 +12,59 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Missing data' });
     }
 
-    // ==============================
-    // FORMAT THÁNG → MM/YYYY
-    // ==============================
+    // chuẩn hóa tháng
     if (thang.includes('-')) {
       const [yyyy, mm] = thang.split('-');
       thang = `${mm}/${yyyy}`;
     }
 
-    // ==============================
-    // PARSE SỐ AN TOÀN
-    // ==============================
     d = Number(d) || 0;
     dd = Number(dd) || 0;
     e = Number(e) || 0;
 
-    // ==============================
-    // CHECK CHỨC VỤ (QUAN TRỌNG)
-    // ==============================
-    const nsData = await readSheet('DM_NHAN_SU');
-
-    if (!nsData || nsData.length <= 1) {
-      return res.status(400).json({ error: 'DM_NHAN_SU empty' });
-    }
-
-    const nsHeaders = nsData[0].map((h: string) => h.toLowerCase());
-    const nsRows = nsData.slice(1);
-
-    const iMa = nsHeaders.indexOf('manhansu');
-    const iChucVu = nsHeaders.indexOf('chucvu');
-
-    const user = nsRows.find(r =>
-      String(r[iMa]).trim() === String(maNhanSu).trim()
-    );
-
-    const chucVu = user ? String(user[iChucVu]).trim() : '';
-
-    if (chucVu !== 'Trưởng phòng' && chucVu !== 'Phó phòng') {
-      return res.status(200).json({
-        success: false,
-        message: 'Không phải lãnh đạo → không lưu'
-      });
-    }
-
-    // ==============================
-    // ĐỌC SHEET NHAP_DIEM_PHU_TRACH
-    // ==============================
     let data = await readSheet('NHAP_DIEM_PHU_TRACH');
 
+    // 👉 Nếu sheet chưa có header → tạo 1 lần duy nhất
     if (!data || data.length === 0) {
-      // tạo mới nếu sheet rỗng
+      await updateSheet('NHAP_DIEM_PHU_TRACH', 'A1:E1', [[
+        'Thang', 'MaNhanSu', 'd', 'đ', 'e'
+      ]]);
+
       data = [['Thang', 'MaNhanSu', 'd', 'đ', 'e']];
     }
 
     const headers = data[0];
     const rows = data.slice(1);
 
-    const h = headers.map((x: string) => x.toLowerCase());
+    const iThang = headers.findIndex((h: string) => h.toLowerCase() === 'thang');
+    const iMaNS = headers.findIndex((h: string) => h.toLowerCase() === 'manhansu');
 
-    const iThang = h.indexOf('thang');
-    const iMaNS = h.indexOf('manhansu');
+    const newRow = [
+      thang,
+      maNhanSu,
+      d,
+      dd,
+      e
+    ];
 
-    // ==============================
-    // UPDATE / INSERT
-    // ==============================
-    let found = false;
+    let rowNumber = -1;
 
-    const newRows = rows.map(r => {
+    rows.forEach((r: any[], idx: number) => {
       if (
         String(r[iThang]).trim() === String(thang).trim() &&
         String(r[iMaNS]).trim() === String(maNhanSu).trim()
       ) {
-        found = true;
-        return [thang, maNhanSu, d, dd, e];
+        rowNumber = idx + 2;
       }
-      return r;
     });
 
-    if (!found) {
-      newRows.push([thang, maNhanSu, d, dd, e]);
+    // 👉 Nếu chưa có → thêm dòng mới
+    if (rowNumber === -1) {
+      rowNumber = data.length + 1;
     }
 
-    // ==============================
-    // GHI LẠI (GIỮ HEADER)
-    // ==============================
-    await writeSheet('NHAP_DIEM_PHU_TRACH', [headers, ...newRows]);
+    // 👉 Ghi đúng 1 dòng duy nhất
+    await updateSheet('NHAP_DIEM_PHU_TRACH', `A${rowNumber}:E${rowNumber}`, [newRow]);
 
     return res.status(200).json({
       success: true,
@@ -106,7 +74,7 @@ export default async function handler(req: any, res: any) {
     });
 
   } catch (err: any) {
-    console.error('SAVE_PHUTRACH ERROR:', err);
+    console.error('SAVE_PT_ERROR:', err);
     return res.status(500).json({ error: err.message });
   }
 }
