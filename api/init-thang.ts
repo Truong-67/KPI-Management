@@ -1,4 +1,4 @@
-import { readSheet, writeSheet } from './_sheets.js';
+import { readSheet, updateSheet } from './_sheets.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
@@ -6,21 +6,32 @@ export default async function handler(req: any, res: any) {
   }
 
   let { thang } = req.body;
+
   if (!thang) {
     return res.status(400).json({ error: 'Missing thang' });
   }
 
-  // ✅ DÙNG THẲNG MM/YYYY – KHÔNG CONVERT
-
   try {
     // =====================================================
-    // 1. ĐỌC NHAP_LIEU → LẤY DANH SÁCH KEY ĐÃ CÓ
+    // 1. ĐỌC NHAP_LIEU
     // =====================================================
     const nhapLieuData = await readSheet('NHAP_LIEU');
-    const nhapLieuHeaders = nhapLieuData[0] || [];
 
-    const keyIdx = nhapLieuHeaders.findIndex((h: string) => h.toLowerCase() === 'keynhap');
+    if (!nhapLieuData || nhapLieuData.length === 0) {
+      return res.status(500).json({ error: 'Sheet NHAP_LIEU chưa có header' });
+    }
 
+    const nhapLieuHeaders = nhapLieuData[0];
+
+    const keyIdx = nhapLieuHeaders.findIndex(
+      (h: string) => h.toLowerCase() === 'keynhap'
+    );
+
+    if (keyIdx === -1) {
+      return res.status(500).json({ error: 'Không tìm thấy cột KeyNhap' });
+    }
+
+    // 👉 Lấy toàn bộ key đã tồn tại
     const existingKeys = new Set(
       nhapLieuData
         .slice(1)
@@ -34,14 +45,14 @@ export default async function handler(req: any, res: any) {
     const phanCongData = await readSheet('PHAN_CONG_NHIEM_VU');
 
     if (!phanCongData || phanCongData.length <= 1) {
-      return res.status(404).json({ error: 'Không có dữ liệu trong PHAN_CONG_NHIEM_VU' });
+      return res.status(404).json({ error: 'PHAN_CONG_NHIEM_VU không có dữ liệu' });
     }
 
     const pcHeaders = phanCongData[0];
 
     const pcRows = phanCongData
       .slice(1)
-      .filter((row: any[]) => row.length > 0 && row.some((cell: any) => cell !== ''));
+      .filter((row: any[]) => row.length > 0 && row.some(c => c !== ''));
 
     const maNsIdx = pcHeaders.findIndex((h: string) =>
       h.toLowerCase().includes('manhansu')
@@ -51,33 +62,35 @@ export default async function handler(req: any, res: any) {
       h.toLowerCase().includes('manhiemvu')
     );
 
+    if (maNsIdx === -1 || maNvIdx === -1) {
+      return res.status(500).json({ error: 'Thiếu cột MaNhanSu hoặc MaNhiemVu' });
+    }
+
     // =====================================================
-    // 3. TẠO DÒNG MỚI (CHỈ THÊM NHỮNG KEY CHƯA CÓ)
+    // 3. TẠO DỮ LIỆU MỚI (KHÔNG TRÙNG)
     // =====================================================
     const newRows: any[] = [];
 
     pcRows.forEach((row: any[]) => {
-      const maNs = maNsIdx !== -1 ? row[maNsIdx] : '';
-      const maNv = maNvIdx !== -1 ? row[maNvIdx] : '';
+      const maNs = row[maNsIdx];
+      const maNv = row[maNvIdx];
 
       const key = `${thang}_${maNs}_${maNv}`;
 
-      // ❗ CHẶN TRÙNG – CỐT LÕI
+      // ❗ CHẶN TRÙNG
       if (existingKeys.has(key)) return;
 
       const newRow = new Array(nhapLieuHeaders.length).fill('');
 
-      nhapLieuHeaders.forEach((nlHeader: string, idx: number) => {
-        const header = nlHeader.toLowerCase();
+      nhapLieuHeaders.forEach((header: string, idx: number) => {
+        const h = header.toLowerCase();
 
-        if (header === 'thang') {
-          newRow[idx] = thang;
-        } 
-        else if (header === 'keynhap') {
+        if (h === 'keynhap') {
           newRow[idx] = key;
-        } 
-        else {
-          const pcIdx = pcHeaders.findIndex((h: string) => h === nlHeader);
+        } else if (h === 'thang') {
+          newRow[idx] = thang;
+        } else {
+          const pcIdx = pcHeaders.findIndex(pcH => pcH === header);
           if (pcIdx !== -1) {
             newRow[idx] = row[pcIdx] || '';
           }
@@ -88,23 +101,34 @@ export default async function handler(req: any, res: any) {
     });
 
     // =====================================================
-    // 4. GHI VÀO SHEET (CHỈ GHI PHẦN THIẾU)
+    // 4. APPEND (KHÔNG BAO GIỜ GHI ĐÈ)
     // =====================================================
     if (newRows.length > 0) {
-      await writeSheet('NHAP_LIEU', newRows);
+      const startRow = nhapLieuData.length + 1;
+
+      const endCol = String.fromCharCode(65 + nhapLieuHeaders.length - 1);
+
+      await updateSheet(
+        'NHAP_LIEU',
+        `A${startRow}:${endCol}${startRow + newRows.length - 1}`,
+        newRows
+      );
     }
 
+    // =====================================================
+    // DONE
+    // =====================================================
     return res.status(200).json({
       success: true,
       added: newRows.length,
       message:
         newRows.length > 0
-          ? `Đã bổ sung ${newRows.length} nhiệm vụ còn thiếu cho tháng ${thang}`
-          : `Tháng ${thang} đã đầy đủ dữ liệu`
+          ? `Đã thêm ${newRows.length} dòng cho tháng ${thang}`
+          : `Tháng ${thang} đã đủ dữ liệu`
     });
 
   } catch (error: any) {
-    console.error('Error init-thang:', error);
+    console.error('init-thang error:', error);
     return res.status(500).json({ error: error.message });
   }
 }
