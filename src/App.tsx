@@ -739,7 +739,7 @@ const handleResetThang = async () => {
               <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.a.toFixed(2)}</p>
             </div>
             {/* Card b */}
-            <div className="bg-gradient-to-br from-emerald-900/40 to-emerald-800/10 border border-emerald-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div className="bg-white dark:bg-gradient-to-br dark:from-emerald-900/40 dark:to-emerald-800/10 border border-slate-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity">
                 <CheckCircle className="w-16 h-16 text-emerald-400" />
               </div>
@@ -747,7 +747,7 @@ const handleResetThang = async () => {
               <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.b.toFixed(2)}</p>
             </div>
             {/* Card c */}
-            <div className="bg-gradient-to-br from-orange-900/40 to-orange-800/10 border border-orange-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div className="bg-white dark:bg-gradient-to-br dark:from-emerald-900/40 dark:to-emerald-800/10 border border-slate-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity">
                 <Clock className="w-16 h-16 text-orange-400" />
               </div>
