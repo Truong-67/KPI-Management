@@ -358,10 +358,11 @@ useEffect(() => {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            thang: apiThang,
-            d: Math.max(0, parseFloat(ptInputs.d || '0') || 0),
-            dd: Math.max(0, parseFloat(ptInputs.dd || '0') || 0),
-            e: Math.max(0, parseFloat(ptInputs.e || '0') || 0)
+          thang: apiThang,
+          maNhanSu: maNhanSu,
+          d: Math.max(0, parseFloat(ptInputs.d || '0') || 0),
+          dd: Math.max(0, parseFloat(ptInputs.dd || '0') || 0),
+          e: Math.max(0, parseFloat(ptInputs.e || '0') || 0)
           })
         });
 
