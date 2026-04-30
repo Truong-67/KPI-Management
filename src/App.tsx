@@ -129,6 +129,9 @@ export default function App() {
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [showChangePass, setShowChangePass] = useState(false);
+const [oldPassword, setOldPassword] = useState('');
+const [newPassword, setNewPassword] = useState('');
   const currentUser = nhanSuList.find(ns => ns.MaNhanSu === maNhanSu);
 
   const isLanhDao =
@@ -423,7 +426,8 @@ export default function App() {
         body: JSON.stringify({
           thang: apiThang,
           maNhanSu: maNhanSu,
-          data: payloadData
+          data: payloadData,
+          user
         })
       });
 
@@ -462,7 +466,8 @@ export default function App() {
             maNhanSu: maNhanSu,
             d: Number(ptInputs.d) || 0,
             dd: Number(ptInputs.dd) || 0,
-            e: Number(ptInputs.e) || 0
+            e: Number(ptInputs.e) || 0,
+            user
           })
         });
       }
@@ -583,7 +588,8 @@ export default function App() {
           action: 'save-tieuchi',
           thang,
           maNhanSu,
-          data: payload
+          data: payload,
+          user
         })
       });
 
@@ -645,6 +651,87 @@ export default function App() {
 }
   
   return (
+    <>
+    {showChangePass && (
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-2xl w-[360px] shadow-xl">
+          <h3 className="text-lg font-bold mb-4">Đổi mật khẩu</h3>
+
+          <input
+            type="password"
+            placeholder="Mật khẩu cũ"
+            className="w-full mb-3 px-3 py-2 border rounded-lg"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+          />
+
+          <input
+            type="password"
+            placeholder="Mật khẩu mới"
+            className="w-full mb-4 px-3 py-2 border rounded-lg"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+            setShowChangePass(false);
+            setOldPassword('');
+            setNewPassword('');
+            }}
+              className="flex-1 bg-gray-300 py-2 rounded-lg"
+            >
+              Hủy
+            </button>
+
+            <button
+              onClick={async () => {
+  try {
+
+    if (!user) {
+      alert('Phiên đăng nhập hết hạn');
+      return;
+    }
+
+    if (!oldPassword || !newPassword) {
+      alert('Nhập đầy đủ mật khẩu');
+      return;
+    }
+
+    const res = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'change-password',
+        username: user.username,
+        oldPassword,
+        newPassword
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error);
+
+    alert('Đổi mật khẩu thành công');
+
+    setShowChangePass(false);
+    setOldPassword('');
+    setNewPassword('');
+
+  } catch (err: any) {
+    alert(err.message);
+  }
+}}
+              className="flex-1 bg-indigo-600 text-white py-2 rounded-lg"
+            >
+              Xác nhận
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     <div className="min-h-screen bg-[#f4f7fb] text-slate-900">
       <div className="flex min-h-screen">
         <aside className="hidden lg:flex w-[280px] flex-col bg-[#111827] text-white border-r border-white/10">
@@ -766,7 +853,12 @@ export default function App() {
       disabled={!thang || user?.role === 'CAN_BO'}
     >
       <option value="">Chọn nhân sự...</option>
-      {nhanSuList.map((ns, idx) => {
+      {nhanSuList
+  .filter(ns => {
+    if (user?.role === 'ADMIN') return true;
+    return ns.PhongBan === user?.phongBan;
+  })
+  .map((ns, idx) => {
         const ma = ns.MaNhanSu || ns.maNhanSu || ns.MA_NHAN_SU;
         const ten = ns.HoTen || ns.hoTen || ns.HO_TEN || ns.TenNhanSu || ma;
         return (
@@ -782,6 +874,14 @@ export default function App() {
   <div className="text-sm text-slate-600 font-semibold ml-2 whitespace-nowrap">
     {user?.hoTen} ({user?.phongBan})
   </div>
+  
+  {/* đổi mật khẩu */}
+<button
+  onClick={() => setShowChangePass(true)}
+  className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-sm font-semibold ml-2"
+>
+  Đổi mật khẩu
+</button>
 
   {/* logout */}
   <button
