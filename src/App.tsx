@@ -847,7 +847,7 @@ const handleResetThang = async () => {
                     min="0"
                     max={tc.diemToiDa}
                     step="0.5"
-                    className="w-20 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-center"
+                    className="w-20 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded px-2 py-1 text-center"
                      value={diemTieuChi[tc.id] ?? ''}
                     onChange={(e) =>
                       setDiemTieuChi(prev => ({
@@ -959,7 +959,7 @@ const handleResetThang = async () => {
                           <input
                             type="number"
                             min="0"
-                            className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                            className="w-20 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                             value={editSoGiao ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoGiao', e.target.value)}
                           />
@@ -968,7 +968,7 @@ const handleResetThang = async () => {
                           <input
                             type="number"
                             min="0"
-                            className="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+                            className="w-20 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white text-center focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
                             value={editSoHoanThanh ?? ''}
                             onChange={(e) => handleEdit(keyNhap, 'SoHoanThanh', e.target.value)}
                           />
