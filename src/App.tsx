@@ -736,47 +736,6 @@ const handleResetThang = async () => {
           </div>
         )}
         
-        {isLanhDao && (
-  <div className="grid grid-cols-3 gap-4 mt-4">
-
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-      <p className="text-sm text-slate-300 mb-2">d</p>
-      <input
-        type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-white"
-        value={ptInputs.d}
-        onChange={(e) =>
-          setPtInputs(prev => ({ ...prev, d: e.target.value }))
-        }
-      />
-    </div>
-
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-      <p className="text-sm text-slate-300 mb-2">đ</p>
-      <input
-        type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-white"
-        value={ptInputs.dd}
-        onChange={(e) =>
-          setPtInputs(prev => ({ ...prev, dd: e.target.value }))
-        }
-      />
-    </div>
-
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-      <p className="text-sm text-slate-300 mb-2">e</p>
-      <input
-        type="number"
-        className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-white"
-        value={ptInputs.e}
-        onChange={(e) =>
-          setPtInputs(prev => ({ ...prev, e: e.target.value }))
-        }
-      />
-    </div>
-
-  </div>
-)}
         {activeTab === 'tieuchi' && (
   <div className="bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
 
