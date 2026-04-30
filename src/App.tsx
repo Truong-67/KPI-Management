@@ -392,7 +392,7 @@ useEffect(() => {
       });
 
       // Gọi lại API KPI phụ trách để cập nhật
-      const ptRes = await fetch(`/api/kpi-phutrach?thang=${apiThang}`);
+      const ptRes = await fetch(`/api/kpi-phutrach?thang=${apiThang}&maNhanSu=${maNhanSu}`);
       if (ptRes.ok) {
         const ptData = await ptRes.json();
         setKpiPhuTrachData({
