@@ -640,7 +640,7 @@ const handleResetThang = async () => {
                 <option value="" className="bg-slate-800">Chọn nhân sự...</option>
                 {[
                   ...nhanSuList,
-                  { MaNhanSu: PHU_TRACH_VALUE, HoTen: 'Phụ trách phòng' }
+                  
                 ].map((ns, idx) => {
                   const ma = ns.MaNhanSu || ns.maNhanSu || ns.MA_NHAN_SU;
                   const ten = ns.HoTen || ns.hoTen || ns.HO_TEN || ns.TenNhanSu || ma;
