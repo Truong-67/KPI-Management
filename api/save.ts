@@ -1,11 +1,48 @@
 import { readSheet, updateSheet } from './_sheets.js';
+// ===============================
+// ===== HELPER PHÂN QUYỀN ======
+// ===============================
+async function getDMNhanSu() {
+  const data = await readSheet('DM_NHAN_SU');
+  if (!data || data.length <= 1) return [];
+
+  const headers = data[0];
+
+  return data.slice(1).map((row: any[]) => {
+    const obj: any = {};
+    headers.forEach((h: string, i: number) => {
+      obj[h] = row[i] || '';
+    });
+    return obj;
+  });
+}
+
+function checkPermission(user: any, targetMaNhanSu: string, dmNhanSu: any[]) {
+  if (!user) return false;
+
+  if (user.role === 'ADMIN') return true;
+
+  if (user.role === 'CAN_BO') {
+    return String(user.maNhanSu).trim() === String(targetMaNhanSu).trim();
+  }
+
+  if (user.role === 'LANH_DAO_PHONG') {
+    const ns = dmNhanSu.find(
+      x => String(x.MaNhanSu).trim() === String(targetMaNhanSu).trim()
+    );
+
+    return String(ns?.PhongBan || '').trim() === String(user.phongBan || '').trim();
+  }
+
+  return false;
+}
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  let { thang, maNhanSu, data: updates } = req.body;
+  let { thang, maNhanSu, data: updates, user } = req.body;
 
   // ===== CHUẨN HÓA THÁNG =====
   if (thang && thang.includes('-')) {
@@ -15,7 +52,11 @@ export default async function handler(req: any, res: any) {
 
   try {
     const data = await readSheet('NHAP_LIEU');
+    const dmNhanSu = await getDMNhanSu();
 
+if (!checkPermission(user, maNhanSu, dmNhanSu)) {
+  return res.status(403).json({ error: 'Không có quyền lưu dữ liệu nhân sự này' });
+}
     if (!data || data.length === 0) {
       return res.status(200).json({ success: true, a: 0, b: 0, c: 0, kpi: 0 });
     }
@@ -52,10 +93,23 @@ export default async function handler(req: any, res: any) {
       let rowIndex = data.findIndex((r: any, i: number) =>
         i > 0 && String(r[iKey]).trim() === String(u.KeyNhap).trim()
       );
+      // 🔐 CHECK QUYỀN TRÊN TỪNG DÒNG
+if (rowIndex !== -1) {
+  const oldRow = data[rowIndex];
+  const rowMaNS = oldRow[iMaNS];
+
+  if (!checkPermission(user, rowMaNS, dmNhanSu)) {
+    throw new Error(`Không có quyền sửa KeyNhap: ${u.KeyNhap}`);
+  }
+}
 
       // ===== CASE 1: CHƯA CÓ → TẠO DÒNG =====
       if (rowIndex === -1) {
-
+        
+        // 🔐 CHECK QUYỀN TẠO DÒNG MỚI (CHÈN NGAY ĐÂY)
+    if (!checkPermission(user, maNhanSu, dmNhanSu)) {
+    throw new Error('Không có quyền tạo dữ liệu');
+      }
         const newRow = new Array(headers.length).fill('');
 
         newRow[iKey] = u.KeyNhap;
