@@ -217,7 +217,7 @@ export default function App() {
 
   setTongTieuChi(tongTC);
 
-  const kpi70 = kpiData?.kpi || 0;
+  const kpi70 = kpiPhuTrachData?.kpi || 0;
 
   setTongDiem(kpi70 + tongTC);
 }, [diemTieuChi, kpiData]);
