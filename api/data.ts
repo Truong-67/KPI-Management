@@ -1,4 +1,4 @@
-import { readSheet, writeSheet } from './_sheets.js';
+import { readSheet, updateSheet } from './_sheets.js';
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -8,13 +8,14 @@ export default async function handler(req: any, res: any) {
   let { thang, maNhanSu, action } =
     req.method === 'GET' ? req.query : req.body;
 
-  // ===== FIX FORMAT THÁNG =====
+  // ===== CHUẨN HÓA THÁNG =====
   if (thang && thang.includes('-')) {
     const [yyyy, mm] = thang.split('-');
     thang = `${mm}/${yyyy}`;
   }
 
   try {
+
     // ==================================================
     // ===== GET TIÊU CHÍ ================================
     // ==================================================
@@ -29,22 +30,16 @@ export default async function handler(req: any, res: any) {
         return res.status(200).json({});
       }
 
-      const headers = data[0];
       const rows = data.slice(1);
-
-      const iThang = headers.findIndex(h => h.toLowerCase() === 'thang');
-      const iMaNS = headers.findIndex(h => h.toLowerCase() === 'manhansu');
-      const iID = headers.findIndex(h => h.toLowerCase() === 'tieuchiid');
-      const iDiem = headers.findIndex(h => h.toLowerCase() === 'diem');
 
       const result: Record<string, number> = {};
 
-      rows.forEach(r => {
+      rows.forEach((r: any[]) => {
         if (
-          String(r[iThang]).trim() === String(thang).trim() &&
-          String(r[iMaNS]).trim() === String(maNhanSu).trim()
+          String(r[0]).trim() === String(thang).trim() &&
+          String(r[1]).trim() === String(maNhanSu).trim()
         ) {
-          result[r[iID]] = Number(r[iDiem]) || 0;
+          result[r[2]] = Number(r[3]) || 0;
         }
       });
 
@@ -55,48 +50,60 @@ export default async function handler(req: any, res: any) {
     // ===== SAVE TIÊU CHÍ (UPSERT CHUẨN) ================
     // ==================================================
     if (action === 'save-tieuchi' && req.method === 'POST') {
-      const { thang: thangBody, maNhanSu: maNSBody, data } = req.body;
+
+      let { thang: thangBody, maNhanSu: maNSBody, data } = req.body;
 
       if (!thangBody || !maNSBody || !Array.isArray(data)) {
         return res.status(400).json({ error: 'Missing or invalid data' });
       }
 
-      const oldData = await readSheet('TIEU_CHI_CHUNG');
-
-      let headers: any[] = ['Thang', 'MaNhanSu', 'TieuChiID', 'Diem'];
-      let oldRows: any[] = [];
-
-      if (oldData && oldData.length > 0) {
-        headers = oldData[0];
-        oldRows = oldData.slice(1);
+      // chuẩn hóa tháng
+      if (thangBody.includes('-')) {
+        const [yyyy, mm] = thangBody.split('-');
+        thangBody = `${mm}/${yyyy}`;
       }
 
-      const filteredOld = oldRows.filter(r => {
-  // ❌ loại bỏ dòng header bị lặp
-  if (String(r[0]).toLowerCase().trim() === 'thang') return false;
+      let sheet = await readSheet('TIEU_CHI_CHUNG');
 
-  // ❌ loại bỏ dữ liệu cùng tháng + nhân sự
-  return !(
-    String(r[0]).trim() === String(thangBody).trim() &&
-    String(r[1]).trim() === String(maNSBody).trim()
-  );
-});
+      // 👉 nếu chưa có sheet → tạo header
+      if (!sheet || sheet.length === 0) {
+        await updateSheet('TIEU_CHI_CHUNG', 'A1:D1', [[
+          'Thang', 'MaNhanSu', 'TieuChiID', 'Diem'
+        ]]);
 
-      // ✅ Tạo dữ liệu mới
-      const newRows = data.map((item: any) => [
-        thangBody,
-        maNSBody,
-        item.id,
-        Number(item.diem) || 0
-      ]);
+        sheet = [['Thang', 'MaNhanSu', 'TieuChiID', 'Diem']];
+      }
 
-      const finalData = [
-        headers,
-        ...filteredOld,
-        ...newRows
-      ];
+      const rows = sheet.slice(1);
 
-      await writeSheet('TIEU_CHI_CHUNG', finalData);
+      for (const item of data) {
+        const tcId = item.id;
+        const diem = Number(item.diem) || 0;
+
+        let rowIndex = -1;
+
+        rows.forEach((r: any[], idx: number) => {
+          if (
+            String(r[0]).trim() === thangBody &&
+            String(r[1]).trim() === maNSBody &&
+            String(r[2]).trim() === tcId
+          ) {
+            rowIndex = idx + 2;
+          }
+        });
+
+        const newRow = [thangBody, maNSBody, tcId, diem];
+
+        if (rowIndex === -1) {
+          rowIndex = rows.length + 2;
+        }
+
+        await updateSheet(
+          'TIEU_CHI_CHUNG',
+          `A${rowIndex}:D${rowIndex}`,
+          [newRow]
+        );
+      }
 
       return res.status(200).json({ success: true });
     }
@@ -105,6 +112,7 @@ export default async function handler(req: any, res: any) {
     // ===== LOAD NHẬP LIỆU ==============================
     // ==================================================
     if (action === 'get-nhiemvu') {
+
       if (!thang || !maNhanSu) {
         return res.status(200).json([]);
       }
@@ -116,9 +124,7 @@ export default async function handler(req: any, res: any) {
       }
 
       const headers = data[0];
-      const rows = data
-        .slice(1)
-        .filter((row: any[]) => row.length > 0 && row.some(c => c !== ''));
+      const rows = data.slice(1);
 
       const result = rows.map((row: any[]) => {
         const obj: any = {};
@@ -129,16 +135,12 @@ export default async function handler(req: any, res: any) {
       });
 
       const filtered = result.filter((item: any) => {
-        const itemThang = item.Thang || item.thang || item.THANG;
-        const itemMaNhanSu =
-          item.MaNhanSu ||
-          item.maNhanSu ||
-          item.MA_NHAN_SU ||
-          item.ma_nhan_su;
+        const itemThang = item.Thang || item.thang;
+        const itemMaNS = item.MaNhanSu || item.maNhanSu;
 
         return (
           String(itemThang).trim() === String(thang).trim() &&
-          String(itemMaNhanSu).trim() === String(maNhanSu).trim()
+          String(itemMaNS).trim() === String(maNhanSu).trim()
         );
       });
 
