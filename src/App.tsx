@@ -715,7 +715,7 @@ const handleResetThang = async () => {
 
         {/* Messages */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl text-sm flex items-center">
+          <div className="bg-red-500/10 border border-red-500/50 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm flex items-center">
             <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0" />
             {error}
           </div>
