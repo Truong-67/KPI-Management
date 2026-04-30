@@ -570,11 +570,11 @@ const handleResetThang = async () => {
   return sum + (parseFloat(diemTieuChi[key]) || 0);
 }, 0);
   return (
-    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-700 dark:text-slate-200 font-sans p-4 md:p-8">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-200 font-sans p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between shadow-lg">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between shadow-lg">
           <div className="flex items-center gap-3 mb-4 md:mb-0">
             <div className="p-2 bg-indigo-500/20 rounded-lg">
               <Activity className="w-6 h-6 text-indigo-400" />
@@ -587,7 +587,7 @@ const handleResetThang = async () => {
     className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
       activeTab === 'kpi'
         ? 'bg-indigo-600 text-slate-900 dark:text-white'
-        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-600 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
     KPI
@@ -598,7 +598,7 @@ const handleResetThang = async () => {
     className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
       activeTab === 'tieuchi'
         ? 'bg-indigo-600 text-slate-900 dark:text-white'
-        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-600 dark:text-slate-300 dark:hover:bg-slate-700'
     }`}
   >
     Đánh giá tiêu chí
@@ -609,7 +609,7 @@ const handleResetThang = async () => {
   className={`px-4 py-2 rounded-lg text-sm font-medium ${
     activeTab === 'tong'
       ? 'bg-indigo-600 text-slate-900 dark:text-white'
-      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+      : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-600 dark:text-slate-300 dark:hover:bg-slate-700'
   }`}
 >
   Tổng điểm
@@ -747,7 +747,7 @@ const handleResetThang = async () => {
               <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.b.toFixed(2)}</p>
             </div>
             {/* Card c */}
-            <div className="bg-white dark:bg-gradient-to-br dark:from-emerald-900/40 dark:to-emerald-800/10 border border-slate-200 dark:border-emerald-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div className="bg-white dark:bg-gradient-to-br dark:from-orange-900/40 dark:to-orange-800/10 dark:border-orange-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity">
                 <Clock className="w-16 h-16 text-orange-400" />
               </div>
@@ -755,7 +755,7 @@ const handleResetThang = async () => {
               <p className="text-3xl font-bold text-slate-900 dark:text-white relative z-10">{dataABC.c.toFixed(2)}</p>
             </div>
             {/* Card KPI */}
-            <div className="bg-gradient-to-br from-purple-900/60 to-purple-800/20 border border-purple-700/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
+            <div className="bg-white dark:bg-gradient-to-br dark:from-purple-900/60 dark:to-purple-800/20 border border-slate-200 dark:border-purple-700/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity">
                 <Award className="w-16 h-16 text-purple-400" />
               </div>
@@ -772,7 +772,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">d – Kết quả lĩnh vực</p>
       <input
         type="number"
-        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
+        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.d}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, d: e.target.value }))
@@ -785,7 +785,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">đ – Tổ chức triển khai</p>
       <input
         type="number"
-        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
+        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.dd}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, dd: e.target.value }))
@@ -798,7 +798,7 @@ const handleResetThang = async () => {
       <p className="text-indigo-300 text-sm mb-2">e – Đoàn kết nội bộ</p>
       <input
         type="number"
-        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 border border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
+        className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-slate-900 dark:text-white text-center"
         value={ptInputs.e}
         onChange={(e) =>
           setPtInputs(prev => ({ ...prev, e: e.target.value }))
@@ -809,9 +809,9 @@ const handleResetThang = async () => {
   </div>
 )}
         {activeTab === 'tieuchi' && (
-  <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-6">
+  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl mt-6">
 
-    <div className="p-5 border-b border-slate-800 bg-slate-100 dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/80">
+    <div className="p-5 border-b border-slate-800 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
       <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
         KẾT QUẢ THEO DÕI - ĐÁNH GIÁ THEO TIÊU CHÍ CHUNG
       </h2>
@@ -834,7 +834,7 @@ const handleResetThang = async () => {
 
               <td className="p-3 text-center">{tc.tt}</td>
 
-              <td className={`p-3 ${tc.isGroup ? 'font-semibold text-slate-900 dark:text-white' : 'pl-6 text-slate-300'}`}>
+              <td className={`p-3 ${tc.isGroup ? 'font-semibold text-slate-900 dark:text-white' : 'pl-6 text-slate-600 dark:text-slate-300'}`}>
                 {tc.noiDung}
               </td>
 
@@ -896,8 +896,8 @@ const handleResetThang = async () => {
 )}
         {/* Input Form */}
         {activeTab === 'kpi' && (
-        <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="p-5 border-b border-slate-800 bg-slate-100 dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/80">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl">
+          <div className="p-5 border-b border-slate-800 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Nhập số liệu nhiệm vụ</h2>
           </div>
           <div className="overflow-x-auto">
@@ -1001,7 +1001,7 @@ const handleResetThang = async () => {
         </div>
       )}
 {activeTab === 'tong' && (
-  <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600/50 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mt-6">
+  <div className="bg-white dark:bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 mt-6">
 
     <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
       Tổng hợp KPI
@@ -1011,7 +1011,7 @@ const handleResetThang = async () => {
 
       {/* KPI nhiệm vụ */}
       <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-xl p-4">
-        <p className="text-sm text-slate-300">KPI nhiệm vụ (70%)</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">KPI nhiệm vụ (70%)</p>
         <p className="text-2xl font-bold text-slate-900 dark:text-white">
           {kpiPhuTrachData?.kpi?.toFixed(2) || '0.00'}
         </p>
@@ -1019,7 +1019,7 @@ const handleResetThang = async () => {
 
       {/* Tiêu chí chung */}
       <div className="bg-emerald-600/20 border border-emerald-500/30 rounded-xl p-4">
-        <p className="text-sm text-slate-300">Tiêu chí chung</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">Tiêu chí chung</p>
         <p className="text-2xl font-bold text-slate-900 dark:text-white">
           {tongTieuChi.toFixed(2)}
         </p>
@@ -1027,7 +1027,7 @@ const handleResetThang = async () => {
 
       {/* Tổng */}
       <div className="bg-purple-600/20 border border-purple-500/30 rounded-xl p-4">
-        <p className="text-sm text-slate-300">Tổng điểm (100)</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">Tổng điểm (100)</p>
         <p className="text-3xl font-bold text-slate-900 dark:text-white">
           {tongDiem.toFixed(2)}
         </p>
