@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, User, Save, Loader2, Activity, Target, CheckCircle, Clock, Award, AlertCircle, CheckCircle2, Star, Shield, FileText } from 'lucide-react';
+import { Calendar, User, Save, Loader2, Activity, Target, CheckCircle, Clock, Award, AlertCircle, CheckCircle2, Star, Shield, FileText, Sun, Moon } from 'lucide-react';
 
 // Helper functions for date conversion
 const toYYYYMM = (thangUI: string) => {
