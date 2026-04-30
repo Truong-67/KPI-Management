@@ -942,7 +942,7 @@ const handleResetThang = async () => {
       <div className="bg-indigo-600/20 border border-indigo-500/30 rounded-xl p-4">
         <p className="text-sm text-slate-300">KPI nhiệm vụ (70%)</p>
         <p className="text-2xl font-bold text-white">
-          {kpiData?.kpi?.toFixed(2) || '0.00'}
+          {kpiPhuTrachData?.kpi?.toFixed(2) || '0.00'}
         </p>
       </div>
 
