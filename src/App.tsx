@@ -613,7 +613,7 @@ const handleResetThang = async () => {
               {/* Nút Lưu */}
               <button
                 onClick={handleSave}
-                disabled={saving || !maNhanSu || (!isPhuTrachMode && nhiemVu.length === 0)}
+                disabled={saving || !maNhanSu || nhiemVu.length === 0}
                 className="flex items-center bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shadow-emerald-900/20"
               >
                 {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
