@@ -156,7 +156,7 @@ export default function App() {
 
   // Fetch KPI cá nhân khi chọn tháng và nhân sự
   useEffect(() => {
-    if (thang && maNhanSu && maNhanSu !== PHU_TRACH_VALUE) {
+    if (thang && maNhanSu) {
       const apiThang = toYYYYMM(thang);
       fetch(`/api/kpi-canhan?thang=${apiThang}&maNhanSu=${maNhanSu}`)
         .then(res => res.json())
@@ -281,7 +281,7 @@ useEffect(() => {
       }
 
       // Nếu đã chọn nhân sự từ trước, load lại nhiệm vụ
-      if (maNhanSu && maNhanSu !== PHU_TRACH_VALUE) {
+      if (maNhanSu) {
         await loadNhiemVu(newThang, maNhanSu);
       } else {
         setNhiemVu([]);
@@ -470,7 +470,7 @@ const handleResetThang = async () => {
     setSuccessMsg('Đã reset dữ liệu');
 
     // reload lại nhiệm vụ
-    if (thang && maNhanSu && maNhanSu !== PHU_TRACH_VALUE) {
+    if (thang && maNhanSu) {
       await loadNhiemVu(thang, maNhanSu);
     }
 
