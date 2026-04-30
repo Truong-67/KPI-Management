@@ -1,4 +1,3 @@
-@@ -1,981 +1,1001 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, User, Save, Loader2, Activity, Target, CheckCircle, Clock, Award, AlertCircle, CheckCircle2, Star, Shield, FileText } from 'lucide-react';
 
