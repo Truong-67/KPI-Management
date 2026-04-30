@@ -6,7 +6,17 @@ import { readSheet, updateSheet } from './_sheets.js';
 
 // Lấy user từ request
 function getUser(req: any) {
-  if (req.method === 'GET') return null;
+  // 🔥 GET → lấy từ query
+  if (req.method === 'GET') {
+    if (!req.query.user) return null;
+    try {
+      return JSON.parse(req.query.user);
+    } catch {
+      return null;
+    }
+  }
+
+  // POST → lấy từ body
   return req.body?.user || null;
 }
 
