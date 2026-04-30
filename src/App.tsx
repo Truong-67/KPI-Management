@@ -656,7 +656,52 @@ const handleResetThang = async () => {
                 <AlertCircle className="w-4 h-4 mr-2" />
                 Reset
               </button>
+              {/* Nút Khởi tạo tháng */}
+<button
+  onClick={async () => {
+    if (!thang) {
+      alert('Chọn tháng trước');
+      return;
+    }
 
+    setLoading(true);
+    setError('');
+    setSuccessMsg('');
+
+    try {
+      const apiThang = toYYYYMM(thang);
+
+      const res = await fetch('/api/init-thang', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thang: apiThang })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Lỗi khởi tạo tháng');
+      }
+
+      setSuccessMsg(data.message || 'Đã khởi tạo tháng');
+
+      // 👉 load lại dữ liệu
+      if (maNhanSu) {
+        await loadNhiemVu(thang, maNhanSu);
+      }
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }}
+  disabled={!thang}
+  className="flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+>
+  <Activity className="w-4 h-4 mr-2" />
+  Khởi tạo tháng
+</button>
             </div>
 
           </div>
