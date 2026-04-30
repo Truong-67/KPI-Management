@@ -673,7 +673,7 @@ const handleResetThang = async () => {
                 <Target className="w-16 h-16 text-blue-400" />
               </div>
               <p className="text-blue-300 text-sm font-medium mb-1 relative z-10">Số lượng (a)</p>
-              <p className="text-3xl font-bold text-white relative z-10">{kpiData.a.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-white relative z-10">{dataABC.a.toFixed(2)}</p>
             </div>
             {/* Card b */}
             <div className="bg-gradient-to-br from-emerald-900/40 to-emerald-800/10 border border-emerald-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
@@ -681,7 +681,7 @@ const handleResetThang = async () => {
                 <CheckCircle className="w-16 h-16 text-emerald-400" />
               </div>
               <p className="text-emerald-300 text-sm font-medium mb-1 relative z-10">Chất lượng (b)</p>
-              <p className="text-3xl font-bold text-white relative z-10">{kpiData.b.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-white relative z-10">{dataABC.b.toFixed(2)}</p>
             </div>
             {/* Card c */}
             <div className="bg-gradient-to-br from-orange-900/40 to-orange-800/10 border border-orange-800/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
@@ -689,7 +689,7 @@ const handleResetThang = async () => {
                 <Clock className="w-16 h-16 text-orange-400" />
               </div>
               <p className="text-orange-300 text-sm font-medium mb-1 relative z-10">Tiến độ (c)</p>
-              <p className="text-3xl font-bold text-white relative z-10">{kpiData.c.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-white relative z-10">{dataABC.c.toFixed(2)}</p>
             </div>
             {/* Card KPI */}
             <div className="bg-gradient-to-br from-purple-900/60 to-purple-800/20 border border-purple-700/50 rounded-2xl p-5 shadow-lg relative overflow-hidden group">
@@ -697,7 +697,7 @@ const handleResetThang = async () => {
                 <Award className="w-16 h-16 text-purple-400" />
               </div>
               <p className="text-purple-300 text-sm font-medium mb-1 relative z-10">KPI 70%</p>
-              <p className="text-4xl font-bold text-white relative z-10">{kpiData.kpi.toFixed(2)}</p>
+              <p className="text-4xl font-bold text-white relative z-10">{dataABC.kpi.toFixed(2)}</p>
             </div>
           </div>
         )}
