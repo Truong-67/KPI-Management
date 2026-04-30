@@ -247,37 +247,47 @@ export default function App() {
   }, [diemTieuChi, kpiPhuTrachData]);
 
   useEffect(() => {
-    setDiemTieuChi({});
+  // 🔐 Không gọi API khi chưa đủ dữ liệu
+  if (!thang || !maNhanSu || !user) return;
 
-    if (!thang || !maNhanSu) return;
+  let cancelled = false;
 
-    let cancelled = false;
-    const apiThang = toYYYYMM(thang);
+  const fetchTieuChi = async () => {
+    try {
+      const apiThang = toYYYYMM(thang);
 
-    fetch(`/api/data?action=get-tieuchi&thang=${apiThang}&maNhanSu=${maNhanSu}`)
-      .then(async res => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text);
-        }
-        return res.json();
-      })
-      .then(tc => {
-        if (!cancelled) {
-          setDiemTieuChi(tc || {});
-        }
-      })
-      .catch(err => {
-        console.error('Lỗi tải tiêu chí:', err);
-        if (!cancelled) {
-          setDiemTieuChi({});
-        }
-      });
+      const res = await fetch(
+        `/api/data?action=get-tieuchi&thang=${apiThang}&maNhanSu=${maNhanSu}&user=${encodeURIComponent(JSON.stringify(user))}`
+      );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [thang, maNhanSu]);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+      }
+
+      const tc = await res.json();
+
+      if (!cancelled) {
+        setDiemTieuChi(tc || {});
+      }
+
+    } catch (err) {
+      console.error('Lỗi tải tiêu chí:', err);
+
+      if (!cancelled) {
+        setDiemTieuChi({});
+      }
+    }
+  };
+
+  fetchTieuChi();
+
+  // 🔥 cleanup chuẩn React
+  return () => {
+    cancelled = true;
+  };
+
+}, [thang, maNhanSu, user]);
 
   const loadNhiemVu = async (t: string, m: string) => {
     const apiThang = toYYYYMM(t);
