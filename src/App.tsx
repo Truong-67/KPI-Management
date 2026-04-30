@@ -264,46 +264,36 @@ useEffect(() => {
     setEdits({});
   };
 
-  // 2. Khi chọn tháng -> gọi init-thang
-  const handleThangChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newThang = e.target.value;
-    setThang(newThang);
-    setSuccessMsg('');
+  // 2. Khi chọn tháng -> chỉ load dữ liệu, KHÔNG khởi tạo tháng
+const handleThangChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const newThang = e.target.value;
+  setThang(newThang);
+  setSuccessMsg('');
+  setError('');
+  setEdits({});
 
-    if (!newThang) {
-      setNhiemVu([]);
-      return;
-    }
+  if (!newThang) {
+    setNhiemVu([]);
+    return;
+  }
 
-    setLoading(true);
-    setError('');
-    try {
-      // Gọi init-thang trước
-      const apiThang = toYYYYMM(newThang);
-      const initRes = await fetch('/api/init-thang', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ thang: apiThang })
-      });
+  // Chỉ load lại nhiệm vụ nếu đã chọn nhân sự
+  if (!maNhanSu) {
+    setNhiemVu([]);
+    return;
+  }
 
-      if (!initRes.ok) {
-        const errData = await initRes.json();
-        throw new Error(errData.error || 'Lỗi khi khởi tạo tháng');
-      }
+  setLoading(true);
 
-      // Nếu đã chọn nhân sự từ trước, load lại nhiệm vụ
-      if (maNhanSu) {
-        await loadNhiemVu(newThang, maNhanSu);
-      } else {
-        setNhiemVu([]);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  try {
+    await loadNhiemVu(newThang, maNhanSu);
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+  
   // 3. Khi chọn nhân sự -> load nhiệm vụ
   const handleNhanSuChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
   const newMa = e.target.value;
