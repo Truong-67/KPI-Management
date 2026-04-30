@@ -139,7 +139,23 @@ export default function App() {
   const [tongDiem, setTongDiem] = useState(0);
   const [tongTieuChi, setTongTieuChi] = useState(0);
   const currentYear = new Date().getFullYear();
+useEffect(() => {
+  const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
 
+  if (savedTheme) {
+    setTheme(savedTheme);
+  }
+}, []);
+
+useEffect(() => {
+  localStorage.setItem('theme', theme);
+
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}, [theme]);
   // 1. Load danh sách nhân sự khi khởi tạo
   useEffect(() => {
     const fetchNhanSu = async () => {
