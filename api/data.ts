@@ -1,12 +1,20 @@
 import { readSheet, updateSheet } from './_sheets.js';
+import crypto from 'node:crypto';
+
+// ===============================
+// ===== HASH ====================
+// ===============================
+function hashPassword(password: string) {
+  return crypto
+    .createHash('sha256')
+    .update(password)
+    .digest('hex');
+}
 
 // ===============================
 // ===== HELPER ==================
 // ===============================
-
-// Lấy user từ request
 function getUser(req: any) {
-  // 🔥 GET → lấy từ query
   if (req.method === 'GET') {
     if (!req.query.user) return null;
     try {
@@ -15,12 +23,9 @@ function getUser(req: any) {
       return null;
     }
   }
-
-  // POST → lấy từ body
   return req.body?.user || null;
 }
 
-// Load DM_NHAN_SU
 async function getDMNhanSu() {
   const data = await readSheet('DM_NHAN_SU');
   if (!data || data.length <= 1) return [];
@@ -35,20 +40,16 @@ async function getDMNhanSu() {
   });
 }
 
-// Kiểm tra quyền
 function checkPermission(user: any, targetMaNhanSu: string, dmNhanSu: any[]) {
   if (!user) return false;
 
-  // ADMIN
   if (user.role === 'ADMIN') return true;
 
-  // CAN_BO
   if (user.role === 'CAN_BO') {
     return String(user.maNhanSu).trim().toUpperCase() === 
            String(targetMaNhanSu).trim().toUpperCase();
   }
 
-  // LANH_DAO_PHONG
   if (user.role === 'LANH_DAO_PHONG') {
     const ns = dmNhanSu.find(
       x => String(x.MaNhanSu).trim().toUpperCase() === 
@@ -70,11 +71,6 @@ async function handleLogin(req: any, res: any) {
     const { username, password } = req.body;
 
     const users = await readSheet('USERS');
-
-    if (!users || users.length <= 1) {
-      return res.status(500).json({ error: 'USERS sheet empty' });
-    }
-
     const headers = users[0];
     const rows = users.slice(1);
 
@@ -86,11 +82,22 @@ async function handleLogin(req: any, res: any) {
       return obj;
     });
 
-    const user = data.find(u =>
-      String(u.Username).trim() === username &&
-      String(u.Password).trim() === password &&
-      String(u.Active).toUpperCase() === 'TRUE'
-    );
+    const hash = hashPassword(password);
+
+    const user = data.find(u => {
+      const usernameDB = String(u.Username || '').trim().toUpperCase();
+      const pass = String(u.Password || '').trim();
+      const passHash = String(u.PasswordHash || '').trim();
+      const active = String(u.Active || '').toUpperCase();
+
+      if (usernameDB !== String(username).trim().toUpperCase() || active !== 'TRUE') return false;
+
+      if (passHash) {
+        return passHash === hash;
+      }
+
+      return pass === password;
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -116,6 +123,58 @@ async function handleLogin(req: any, res: any) {
 }
 
 // ===============================
+// ===== CHANGE PASSWORD =========
+// ===============================
+async function handleChangePassword(req: any, res: any) {
+  try {
+    const { username, oldPassword, newPassword } = req.body;
+
+    const users = await readSheet('USERS');
+    const headers = users[0];
+    const rows = users.slice(1);
+
+    const iUsername = headers.indexOf('Username');
+    const iPassword = headers.indexOf('Password');
+    const iPasswordHash = headers.indexOf('PasswordHash');
+
+    let foundIndex = -1;
+
+    rows.forEach((r, idx) => {
+      const usernameDB = String(r[iUsername] || '').trim().toUpperCase();
+      const pass = String(r[iPassword] || '').trim();
+      const passHash = String(r[iPasswordHash] || '').trim();
+
+      const oldHash = hashPassword(oldPassword);
+
+      const isValid = passHash
+        ? passHash === oldHash
+        : pass === oldPassword;
+
+      if (usernameDB === String(username).trim().toUpperCase() && isValid) {
+        foundIndex = idx + 1;
+      }
+    });
+
+    if (foundIndex === -1) {
+      return res.status(400).json({ error: 'Mật khẩu cũ không đúng' });
+    }
+
+    const newHash = hashPassword(newPassword);
+
+    const rowNumber = foundIndex + 1;
+    const colLetter = String.fromCharCode(65 + iPasswordHash);
+    const range = `${colLetter}${rowNumber}`;
+
+    await updateSheet('USERS', range, [[newHash]]);
+
+    return res.json({ success: true });
+
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+// ===============================
 // ===== MAIN ====================
 // ===============================
 export default async function handler(req: any, res: any) {
@@ -127,7 +186,6 @@ export default async function handler(req: any, res: any) {
   let { thang, maNhanSu, action } =
     req.method === 'GET' ? req.query : req.body;
 
-  // chuẩn hóa tháng
   if (thang && thang.includes('-')) {
     const [yyyy, mm] = thang.split('-');
     thang = `${mm}/${yyyy}`;
@@ -135,33 +193,28 @@ export default async function handler(req: any, res: any) {
 
   try {
 
-    // ================= LOGIN =================
     if (action === 'login') {
       return handleLogin(req, res);
+    }
+
+    if (action === 'change-password') {
+      return handleChangePassword(req, res);
     }
 
     const user = getUser(req);
     const dmNhanSu = await getDMNhanSu();
 
-    // ==================================================
-    // ===== GET TIÊU CHÍ ================================
-    // ==================================================
+    // ===== GET TIÊU CHÍ =====
     if (action === 'get-tieuchi') {
 
-      if (!thang || !maNhanSu) {
-        return res.status(200).json({});
-      }
+      if (!thang || !maNhanSu) return res.status(200).json({});
 
-      // 🔐 check quyền
       if (!checkPermission(user, maNhanSu, dmNhanSu)) {
         return res.status(403).json({ error: 'Không có quyền' });
       }
 
       const data = await readSheet('TIEU_CHI_CHUNG');
-
-      if (!data || data.length <= 1) {
-        return res.status(200).json({});
-      }
+      if (!data || data.length <= 1) return res.status(200).json({});
 
       const rows = data.slice(1);
       const result: Record<string, number> = {};
@@ -178,18 +231,15 @@ export default async function handler(req: any, res: any) {
       return res.status(200).json(result);
     }
 
-    // ==================================================
-    // ===== SAVE TIÊU CHÍ ===============================
-    // ==================================================
+    // ===== SAVE TIÊU CHÍ =====
     if (action === 'save-tieuchi' && req.method === 'POST') {
 
       let { thang: thangBody, maNhanSu: maNSBody, data } = req.body;
 
       if (!thangBody || !maNSBody || !Array.isArray(data)) {
-        return res.status(400).json({ error: 'Missing or invalid data' });
+        return res.status(400).json({ error: 'Missing data' });
       }
 
-      // 🔐 check quyền
       if (!checkPermission(user, maNSBody, dmNhanSu)) {
         return res.status(403).json({ error: 'Không có quyền' });
       }
@@ -201,22 +251,10 @@ export default async function handler(req: any, res: any) {
 
       const oldData = await readSheet('TIEU_CHI_CHUNG');
 
-      let headers = ['Thang', 'MaNhanSu', 'TieuChiID', 'Diem'];
-      let oldRows: any[] = [];
-
-      if (oldData && oldData.length > 0) {
-        headers = oldData[0];
-        oldRows = oldData.slice(1);
-      }
-
-      const filtered = oldRows.filter(r => {
-        if (String(r[0]).toLowerCase().trim() === 'thang') return false;
-
-        return !(
-          String(r[0]).trim() === thangBody &&
-          String(r[1]).trim() === maNSBody
-        );
-      });
+      const headers = oldData[0];
+      const oldRows = oldData.slice(1).filter(r =>
+        !(String(r[0]).trim() === thangBody && String(r[1]).trim() === maNSBody)
+      );
 
       const newRows = data.map((item: any) => [
         thangBody,
@@ -225,40 +263,26 @@ export default async function handler(req: any, res: any) {
         Number(item.diem) || 0
       ]);
 
-      const finalData = [
+      await updateSheet('TIEU_CHI_CHUNG', `A1:D${oldRows.length + newRows.length + 1}`, [
         headers,
-        ...filtered,
+        ...oldRows,
         ...newRows
-      ];
+      ]);
 
-      await updateSheet(
-        'TIEU_CHI_CHUNG',
-        `A1:D${finalData.length}`,
-        finalData
-      );
-
-      return res.status(200).json({ success: true });
+      return res.json({ success: true });
     }
 
-    // ==================================================
-    // ===== LOAD NHẬP LIỆU ==============================
-    // ==================================================
+    // ===== LOAD NHIỆM VỤ =====
     if (action === 'get-nhiemvu') {
 
-      if (!thang || !maNhanSu) {
-        return res.status(200).json([]);
-      }
+      if (!thang || !maNhanSu) return res.status(200).json([]);
 
-      // 🔐 check quyền
       if (!checkPermission(user, maNhanSu, dmNhanSu)) {
         return res.status(403).json({ error: 'Không có quyền' });
       }
 
       const data = await readSheet('NHAP_LIEU');
-
-      if (!data || data.length <= 1) {
-        return res.status(200).json([]);
-      }
+      if (!data || data.length <= 1) return res.status(200).json([]);
 
       const headers = data[0];
       const rows = data.slice(1);
@@ -271,22 +295,14 @@ export default async function handler(req: any, res: any) {
         return obj;
       });
 
-      const filtered = result.filter((item: any) => {
-        const itemThang = item.Thang || item.thang;
-        const itemMaNS = item.MaNhanSu || item.maNhanSu;
-
-        return (
-          String(itemThang).trim() === String(thang).trim() &&
-          String(itemMaNS).trim() === String(maNhanSu).trim()
-        );
-      });
-
-      return res.status(200).json(filtered);
+      return res.status(200).json(
+        result.filter((item: any) =>
+          String(item.Thang).trim() === String(thang).trim() &&
+          String(item.MaNhanSu).trim() === String(maNhanSu).trim()
+        )
+      );
     }
 
-    // ==================================================
-    // ===== DEFAULT =====================================
-    // ==================================================
     return res.status(400).json({ error: 'Invalid action' });
 
   } catch (error: any) {
