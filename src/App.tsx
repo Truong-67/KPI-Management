@@ -299,13 +299,10 @@ useEffect(() => {
   setMaNhanSu(newMa);
   setSuccessMsg('');
 
-  // luôn reset bảng trước
   setNhiemVu([]);
+  setEdits({});
 
   if (!thang || !newMa) return;
-
-  // 👉 nếu là PHỤ TRÁCH → KHÔNG load nhiệm vụ (đúng logic)
-  if (newMa === PHU_TRACH_VALUE) return;
 
   setLoading(true);
   setError('');
