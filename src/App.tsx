@@ -342,57 +342,6 @@ useEffect(() => {
     setSaving(true);
     setError('');
     setSuccessMsg('');
-
-    if (isPhuTrachMode) {
-      try {
-        const apiThang = toYYYYMM(thang).includes('-')
-          ? (() => {
-              const [yyyy, mm] = toYYYYMM(thang).split('-');
-              return `${mm}/${yyyy}`;
-            })()
-          : thang;
-
-        const res = await fetch('/api/save-phutrach', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-          thang: apiThang,
-          maNhanSu: maNhanSu,
-          d: Math.max(0, parseFloat(ptInputs.d || '0') || 0),
-          dd: Math.max(0, parseFloat(ptInputs.dd || '0') || 0),
-          e: Math.max(0, parseFloat(ptInputs.e || '0') || 0)
-          })
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || 'Lỗi khi lưu dữ liệu phụ trách');
-        }
-
-        setSuccessMsg('Lưu dữ liệu phụ trách thành công!');
-
-        setKpiPhuTrachData({
-          a: data.a || 0,
-          b: data.b || 0,
-          c: data.c || 0,
-          d: data.d || 0,
-          dd: data.dd || 0,
-          e: data.e || 0,
-          kpi: data.kpi || 0
-        });
-
-        setPtInputs({
-          d: String(data.d ?? 0),
-          dd: String(data.dd ?? 0),
-          e: String(data.e ?? 0)
-        });
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setSaving(false);
-      }
-      return;
-    }
     
     try {
       const payloadData = nhiemVu.map(nv => {
