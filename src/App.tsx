@@ -14,7 +14,6 @@ const toMMYYYY = (thangAPI: string) => {
   return `${mm}/${yyyy}`;
 };
 
-const PHU_TRACH_VALUE = 'PHU_TRACH';
 type TieuChiItem = {
   id: string;
   tt: string;
