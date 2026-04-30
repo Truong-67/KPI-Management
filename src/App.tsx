@@ -172,7 +172,7 @@ export default function App() {
     };
     fetchNhanSu();
   }, []);
-
+  
   useEffect(() => {
   const u = localStorage.getItem('kpi_user');
   if (u) {
@@ -247,46 +247,19 @@ export default function App() {
   }, [diemTieuChi, kpiPhuTrachData]);
 
   useEffect(() => {
-    setDiemTieuChi({});
   // 🔐 Không gọi API khi chưa đủ dữ liệu
   if (!thang || !maNhanSu || !user) return;
 
-    if (!thang || !maNhanSu) return;
   let cancelled = false;
 
-    let cancelled = false;
-    const apiThang = toYYYYMM(thang);
   const fetchTieuChi = async () => {
     try {
       const apiThang = toYYYYMM(thang);
 
-    fetch(`/api/data?action=get-tieuchi&thang=${apiThang}&maNhanSu=${maNhanSu}`)
-      .then(async res => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text);
-        }
-        return res.json();
-      })
-      .then(tc => {
-        if (!cancelled) {
-          setDiemTieuChi(tc || {});
-        }
-      })
-      .catch(err => {
-        console.error('Lỗi tải tiêu chí:', err);
-        if (!cancelled) {
-          setDiemTieuChi({});
-        }
-      });
       const res = await fetch(
         `/api/data?action=get-tieuchi&thang=${apiThang}&maNhanSu=${maNhanSu}&user=${encodeURIComponent(JSON.stringify(user))}`
       );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [thang, maNhanSu]);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text);
@@ -418,7 +391,7 @@ export default function App() {
     setLoginLoading(false);
   }
 };
-
+  
   const handlePtInputChange = (field: 'd' | 'dd' | 'e', value: string) => {
     setPtInputs(prev => ({
       ...prev,
@@ -670,7 +643,7 @@ export default function App() {
     </div>
   );
 }
-
+  
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-900">
       <div className="flex min-h-screen">
