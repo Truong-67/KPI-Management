@@ -178,38 +178,39 @@ export default function App() {
 
   // Fetch KPI phụ trách khi chọn tháng
   useEffect(() => {
-    if (thang) {
-      const apiThang = toYYYYMM(thang);
-      
-    // ===== KPI PHỤ TRÁCH =====
-      fetch(`/api/kpi-phutrach?thang=${apiThang}&maNhanSu=${maNhanSu}`)
-        .then(res => res.json())
-        .then(data => {
-          const mapped = {
-            a: data.a || 0,
-            b: data.b || 0,
-            c: data.c || 0,
-            d: data.d || 0,
-            dd: data.dd || 0,
-            e: data.e || 0,
-            kpi: data.kpi || 0
-          };
+  if (thang && maNhanSu) {
 
-          setKpiPhuTrachData(mapped);
+    const apiThang = toYYYYMM(thang);
 
-          setPtInputs({
-            d: String(mapped.d ?? 0),
-            dd: String(mapped.dd ?? 0),
-            e: String(mapped.e ?? 0)
-          });
-          
-        })
-        .catch(err => console.error('Lỗi khi tải KPI phụ trách:', err));
-    } else {
-      setKpiPhuTrachData(null);
-      setPtInputs({ d: '', dd: '', e: '' });
-    }
-  }, [thang]);
+    fetch(`/api/kpi-phutrach?thang=${apiThang}&maNhanSu=${maNhanSu}`)
+      .then(res => res.json())
+      .then(data => {
+        const mapped = {
+          a: data.a || 0,
+          b: data.b || 0,
+          c: data.c || 0,
+          d: data.d || 0,
+          dd: data.dd || 0,
+          e: data.e || 0,
+          kpi: data.kpi || 0
+        };
+
+        setKpiPhuTrachData(mapped);
+
+        setPtInputs({
+          d: String(mapped.d ?? 0),
+          dd: String(mapped.dd ?? 0),
+          e: String(mapped.e ?? 0)
+        });
+
+      })
+      .catch(err => console.error('Lỗi khi tải KPI:', err));
+
+  } else {
+    setKpiPhuTrachData(null);
+    setPtInputs({ d: '', dd: '', e: '' });
+  }
+}, [thang, maNhanSu]);
   useEffect(() => {
   const tongTC = Object.values(diemTieuChi).reduce(
     (sum: number, v: any) => sum + (Number(v) || 0),
