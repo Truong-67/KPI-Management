@@ -820,7 +820,7 @@ const handleResetThang = async () => {
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse text-sm">
         <thead>
-          <tr className="bg-slate-800/50 text-slate-400 uppercase">
+          <tr className="bg-slate-100 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400 uppercase">
             <th className="p-3">TT</th>
             <th className="p-3">Tiêu chí</th>
             <th className="p-3 text-center">Điểm tối đa</th>
@@ -903,7 +903,7 @@ const handleResetThang = async () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-800/50 text-slate-400 text-xs uppercase tracking-wider">
+                <tr className="bg-slate-100 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400 text-xs uppercase tracking-wider">
                   <th className="p-4 font-medium w-1/3">Tên nhiệm vụ</th>
                   <th className="p-4 font-medium text-center">Số giao</th>
                   <th className="p-4 font-medium text-center">Hoàn thành</th>
