@@ -223,27 +223,38 @@ export default function App() {
 }, [diemTieuChi, kpiPhuTrachData]);
 // ===== LOAD TIÊU CHÍ (ĐÚNG CHUẨN) =====
 useEffect(() => {
+  setDiemTieuChi({});
+
   if (!thang || !maNhanSu) return;
 
+  let cancelled = false;
   const apiThang = toYYYYMM(thang);
 
   fetch(`/api/data?action=get-tieuchi&thang=${apiThang}&maNhanSu=${maNhanSu}`)
-  .then(async res => {
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text);
-    }
-    return res.json();
-  })
+    .then(async res => {
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+      }
+      return res.json();
+    })
     .then(tc => {
-      setDiemTieuChi(tc || {});
+      if (!cancelled) {
+        setDiemTieuChi(tc || {});
+      }
     })
     .catch(err => {
       console.error('Lỗi tải tiêu chí:', err);
-      setDiemTieuChi({});
+      if (!cancelled) {
+        setDiemTieuChi({});
+      }
     });
 
+  return () => {
+    cancelled = true;
+  };
 }, [thang, maNhanSu]);
+  
   const loadNhiemVu = async (t: string, m: string) => {
     const apiThang = toYYYYMM(t);
     const res = await fetch(`/api/nhiemvu?thang=${apiThang}&maNhanSu=${m}`);
