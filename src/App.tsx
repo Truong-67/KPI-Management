@@ -125,6 +125,10 @@ export default function App() {
   const [nhanSuList, setNhanSuList] = useState<any[]>([]);
   const [thang, setThang] = useState<string>('');
   const [maNhanSu, setMaNhanSu] = useState<string>('');
+  const [user, setUser] = useState<any>(null);
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const currentUser = nhanSuList.find(ns => ns.MaNhanSu === maNhanSu);
 
   const isLanhDao =
@@ -168,6 +172,15 @@ export default function App() {
     };
     fetchNhanSu();
   }, []);
+  
+  useEffect(() => {
+  const u = localStorage.getItem('kpi_user');
+  if (u) {
+    const parsed = JSON.parse(u);
+    setUser(parsed);
+    setMaNhanSu(parsed.maNhanSu); // 🔥 tự set luôn nhân sự
+  }
+}, []);
 
   useEffect(() => {
     if (thang && maNhanSu) {
@@ -335,6 +348,40 @@ export default function App() {
     }));
   };
 
+  const handleLogin = async () => {
+  setLoginLoading(true);
+  setLoginError('');
+
+  try {
+    const res = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'login',
+        username: loginForm.username,
+        password: loginForm.password
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Đăng nhập thất bại');
+    }
+
+    localStorage.setItem('kpi_user', JSON.stringify(data.user));
+    setUser(data.user);
+
+    // 🔥 set luôn nhân sự
+    setMaNhanSu(data.user.maNhanSu);
+
+  } catch (err: any) {
+    setLoginError(err.message);
+  } finally {
+    setLoginLoading(false);
+  }
+};
+  
   const handlePtInputChange = (field: 'd' | 'dd' | 'e', value: string) => {
     setPtInputs(prev => ({
       ...prev,
@@ -546,6 +593,47 @@ export default function App() {
     return sum + (parseFloat(diemTieuChi[key]) || 0);
   }, 0);
 
+  if (!user) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+      <div className="bg-white p-8 rounded-3xl shadow-xl w-[360px]">
+        <h2 className="text-xl font-bold mb-6 text-center">Đăng nhập KPI</h2>
+
+        {loginError && (
+          <div className="text-red-500 text-sm mb-3">{loginError}</div>
+        )}
+
+        <input
+          type="text"
+          placeholder="Tài khoản"
+          className="w-full mb-3 px-4 py-2 border rounded-xl"
+          value={loginForm.username}
+          onChange={(e) =>
+            setLoginForm({ ...loginForm, username: e.target.value })
+          }
+        />
+
+        <input
+          type="password"
+          placeholder="Mật khẩu"
+          className="w-full mb-4 px-4 py-2 border rounded-xl"
+          value={loginForm.password}
+          onChange={(e) =>
+            setLoginForm({ ...loginForm, password: e.target.value })
+          }
+        />
+
+        <button
+          onClick={handleLogin}
+          className="w-full bg-indigo-600 text-white py-2 rounded-xl font-bold"
+        >
+          {loginLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+        </button>
+      </div>
+    </div>
+  );
+}
+  
   return (
     <div className="min-h-screen bg-[#f4f7fb] text-slate-900">
       <div className="flex min-h-screen">
@@ -636,48 +724,69 @@ export default function App() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3 py-2 shadow-sm">
-                    <Calendar className="w-4 h-4 text-indigo-500" />
-                    <select
-                      className="bg-transparent outline-none text-sm font-semibold text-slate-700 min-w-[130px]"
-                      value={thang}
-                      onChange={handleThangChange}
-                    >
-                      <option value="">Chọn tháng...</option>
-                      {[...Array(12)].map((_, i) => {
-                        const monthStr = String(i + 1).padStart(2, '0');
-                        const value = `${monthStr}/${currentYear}`;
-                        return (
-                          <option key={value} value={value}>
-                            Tháng {i + 1}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
 
-                  <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3 py-2 shadow-sm">
-                    <User className="w-4 h-4 text-indigo-500" />
-                    <select
-                      className="bg-transparent outline-none text-sm font-semibold text-slate-700 min-w-[180px] max-w-[260px]"
-                      value={maNhanSu}
-                      onChange={handleNhanSuChange}
-                      disabled={!thang}
-                    >
-                      <option value="">Chọn nhân sự...</option>
-                      {nhanSuList.map((ns, idx) => {
-                        const ma = ns.MaNhanSu || ns.maNhanSu || ns.MA_NHAN_SU;
-                        const ten = ns.HoTen || ns.hoTen || ns.HO_TEN || ns.TenNhanSu || ma;
-                        return (
-                          <option key={idx} value={ma}>
-                            {ten}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                </div>
-              </div>
+  {/* tháng */}
+  <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3 py-2 shadow-sm">
+    <Calendar className="w-4 h-4 text-indigo-500" />
+    <select
+      className="bg-transparent outline-none text-sm font-semibold text-slate-700 min-w-[130px]"
+      value={thang}
+      onChange={handleThangChange}
+    >
+      <option value="">Chọn tháng...</option>
+      {[...Array(12)].map((_, i) => {
+        const monthStr = String(i + 1).padStart(2, '0');
+        const value = `${monthStr}/${currentYear}`;
+        return (
+          <option key={value} value={value}>
+            Tháng {i + 1}
+          </option>
+        );
+      })}
+    </select>
+  </div>
+
+  {/* nhân sự */}
+  <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-3 py-2 shadow-sm">
+    <User className="w-4 h-4 text-indigo-500" />
+    <select
+      className="bg-transparent outline-none text-sm font-semibold text-slate-700 min-w-[180px] max-w-[260px]"
+      value={maNhanSu}
+      onChange={handleNhanSuChange}
+      disabled={!thang || user?.role === 'CAN_BO'}
+    >
+      <option value="">Chọn nhân sự...</option>
+      {nhanSuList.map((ns, idx) => {
+        const ma = ns.MaNhanSu || ns.maNhanSu || ns.MA_NHAN_SU;
+        const ten = ns.HoTen || ns.hoTen || ns.HO_TEN || ns.TenNhanSu || ma;
+        return (
+          <option key={idx} value={ma}>
+            {ten}
+          </option>
+        );
+      })}
+    </select>
+  </div>
+
+  {/* user */}
+  <div className="text-sm text-slate-600 font-semibold ml-2 whitespace-nowrap">
+    {user?.hoTen} ({user?.phongBan})
+  </div>
+
+  {/* logout */}
+  <button
+    onClick={() => {
+      localStorage.removeItem('kpi_user');
+      setUser(null);
+      setMaNhanSu('');
+    }}
+    className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-xl text-sm font-semibold ml-2"
+  >
+    Đăng xuất
+  </button>
+
+</div>
+</div>
 
               <div className="mt-4 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
                 <div className="flex lg:hidden gap-2 overflow-x-auto pb-1">
