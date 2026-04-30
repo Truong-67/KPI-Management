@@ -37,18 +37,26 @@ async function getDMNhanSu() {
 
 // Kiểm tra quyền
 function checkPermission(user: any, targetMaNhanSu: string, dmNhanSu: any[]) {
-
   if (!user) return false;
 
+  // ADMIN
   if (user.role === 'ADMIN') return true;
 
+  // CAN_BO
   if (user.role === 'CAN_BO') {
-    return user.maNhanSu === targetMaNhanSu;
+    return String(user.maNhanSu).trim().toUpperCase() === 
+           String(targetMaNhanSu).trim().toUpperCase();
   }
 
+  // LANH_DAO_PHONG
   if (user.role === 'LANH_DAO_PHONG') {
-    const ns = dmNhanSu.find(x => x.MaNhanSu === targetMaNhanSu);
-    return ns?.PhongBan === user.phongBan;
+    const ns = dmNhanSu.find(
+      x => String(x.MaNhanSu).trim().toUpperCase() === 
+           String(targetMaNhanSu).trim().toUpperCase()
+    );
+
+    return String(ns?.PhongBan || '').trim().toUpperCase() === 
+           String(user.phongBan || '').trim().toUpperCase();
   }
 
   return false;
