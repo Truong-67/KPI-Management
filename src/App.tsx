@@ -281,7 +281,7 @@ export default function App() {
 
   const loadNhiemVu = async (t: string, m: string) => {
     const apiThang = toYYYYMM(t);
-    const res = await fetch(`/api/nhiemvu?thang=${apiThang}&maNhanSu=${m}`);
+    const res = await fetch(`/api/nhiemvu?thang=${apiThang}&maNhanSu=${m}&user=${encodeURIComponent(JSON.stringify(user))}`);
     if (!res.ok) throw new Error('Lỗi khi tải nhiệm vụ');
     const data = await res.json();
     setNhiemVu(data);
