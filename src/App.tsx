@@ -220,7 +220,7 @@ export default function App() {
   const kpi70 = kpiPhuTrachData?.kpi || 0;
 
   setTongDiem(kpi70 + tongTC);
-}, [diemTieuChi, kpiData]);
+}, [diemTieuChi, kpiPhuTrachData]);
 // ===== LOAD TIÊU CHÍ (ĐÚNG CHUẨN) =====
 useEffect(() => {
   if (!thang || !maNhanSu) return;
