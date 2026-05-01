@@ -230,7 +230,59 @@ export default async function handler(req: any, res: any) {
 
       return res.status(200).json(result);
     }
+  // =======================================
+// ===== THỐNG KÊ THEO PHÒNG ============
+// =======================================
+if (action === 'get-thongke') {
+  if (!thang || !user) {
+    return res.status(400).json({ error: 'Missing params' });
+  }
 
+  const dmNhanSu = await readSheet('DM_NHAN_SU');
+  const kpiData = await readSheet('KPI_LUU_TRU');
+
+  const dmHeaders = dmNhanSu[0];
+  const kpiHeaders = kpiData[0];
+
+  const getIdx = (arr: string[], name: string) =>
+    arr.findIndex(h => h.toLowerCase() === name.toLowerCase());
+
+  const iMaNS = getIdx(dmHeaders, 'MaNhanSu');
+  const iHoTen = getIdx(dmHeaders, 'HoTen');
+  const iPhong = getIdx(dmHeaders, 'PhongBan');
+
+  const iKPI_MaNS = getIdx(kpiHeaders, 'MaNhanSu');
+  const iKPI_Thang = getIdx(kpiHeaders, 'Thang');
+  const iTong = getIdx(kpiHeaders, 'kpi');
+
+  const rowsNS = dmNhanSu.slice(1);
+  const rowsKPI = kpiData.slice(1);
+
+  // 🔥 LỌC THEO PHÒNG
+  const result = rowsNS
+    .filter(r => {
+      const phong = String(r[iPhong] || '').trim();
+      return phong === String(user.phongBan).trim();
+    })
+    .map(r => {
+      const ma = r[iMaNS];
+      const ten = r[iHoTen];
+
+      const kpiRow = rowsKPI.find(k =>
+        String(k[iKPI_MaNS]).trim() === String(ma).trim() &&
+        String(k[iKPI_Thang]).trim() === String(thang).trim()
+      );
+
+      return {
+        MaNhanSu: ma,
+        HoTen: ten,
+        TongDiem: Number(kpiRow?.[iTong] || 0)
+      };
+    })
+    .sort((a, b) => b.TongDiem - a.TongDiem);
+
+  return res.status(200).json(result);
+}
     // ===== SAVE TIÊU CHÍ =====
     if (action === 'save-tieuchi' && req.method === 'POST') {
 
