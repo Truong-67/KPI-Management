@@ -1566,6 +1566,44 @@ await loadNhiemVu(thang, maNhanSu);
                 </div>
               </div>
             )}
+            {/* 🔥 CHÈN NGAY TẠI ĐÂY */}
+            {activeTab === 'thongke' && (
+              <div className="p-6">
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                  <h2 className="text-lg font-black text-slate-950 mb-4">
+                    📊 Bảng xếp hạng phòng ({user?.phongBan})
+                  </h2>
+
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-slate-500 border-b">
+                        <th className="py-2">#</th>
+                        <th>Họ tên</th>
+                        <th className="text-right">Tổng điểm</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {thongKeData.map((row, idx) => (
+                        <tr key={idx} className="border-b hover:bg-slate-50">
+                          <td className="py-2 font-bold">{idx + 1}</td>
+                          <td>{row.HoTen}</td>
+                          <td className="text-right font-bold text-indigo-600">
+                            {Number(row.TongDiem || 0).toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {thongKeData.length === 0 && (
+                    <div className="text-center text-slate-400 py-6">
+                      Không có dữ liệu
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
