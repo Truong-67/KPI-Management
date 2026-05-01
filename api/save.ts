@@ -118,10 +118,11 @@ export default async function handler(req: any, res: any) {
         const clientTime = String(u.LastUpdated || '');
 
         if (serverTime && clientTime && serverTime !== clientTime) {
-          return res.status(409).json({
-            error: 'Dữ liệu đã bị thay đổi bởi người khác, vui lòng tải lại!'
-          });
-        }
+  return res.status(409).json({
+    error: 'Dữ liệu đã bị thay đổi bởi người khác, vui lòng tải lại!',
+    conflictKeys: [u.KeyNhap]
+  });
+}
       }
 
       // ===============================
