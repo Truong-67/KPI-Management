@@ -1,5 +1,5 @@
 import { readSheet, updateSheet } from './_sheets.js';
-import crypto from 'node:crypto';
+import crypto from 'crypto';
 
 // ===============================
 // ===== HASH ====================
