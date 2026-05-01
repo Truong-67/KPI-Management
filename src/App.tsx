@@ -129,6 +129,12 @@ export default function App() {
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+  // ===== ĐỔI MẬT KHẨU =====
+  const [showChangePass, setShowChangePass] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [changingPassword, setChangingPassword] = useState(false);
   const currentUser = nhanSuList.find(ns => ns.MaNhanSu === maNhanSu);
 
   const isLanhDao =
@@ -392,6 +398,61 @@ export default function App() {
   }
 };
   
+  // ===== XỬ LÝ ĐỔI MẬT KHẨU =====
+  const handleChangePassword = async () => {
+    if (!user) {
+      alert('Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.');
+      return;
+    }
+
+    if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
+      alert('Vui lòng nhập đầy đủ mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu mới.');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert('Mật khẩu mới và xác nhận mật khẩu mới chưa khớp.');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      alert('Mật khẩu mới nên có ít nhất 6 ký tự.');
+      return;
+    }
+
+    setChangingPassword(true);
+
+    try {
+      const res = await fetch('/api/data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'change-password',
+          username: user.username,
+          oldPassword,
+          newPassword
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || data.message || 'Đổi mật khẩu thất bại');
+      }
+
+      alert('Đổi mật khẩu thành công. Từ lần đăng nhập sau, vui lòng dùng mật khẩu mới.');
+
+      setShowChangePass(false);
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      alert(err.message || 'Đổi mật khẩu thất bại');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   const handlePtInputChange = (field: 'd' | 'dd' | 'e', value: string) => {
     setPtInputs(prev => ({
       ...prev,
@@ -423,7 +484,8 @@ export default function App() {
         body: JSON.stringify({
           thang: apiThang,
           maNhanSu: maNhanSu,
-          data: payloadData
+          data: payloadData,
+          user
         })
       });
 
@@ -462,7 +524,8 @@ export default function App() {
             maNhanSu: maNhanSu,
             d: Number(ptInputs.d) || 0,
             dd: Number(ptInputs.dd) || 0,
-            e: Number(ptInputs.e) || 0
+            e: Number(ptInputs.e) || 0,
+            user
           })
         });
       }
@@ -583,7 +646,8 @@ export default function App() {
           action: 'save-tieuchi',
           thang,
           maNhanSu,
-          data: payload
+          data: payload,
+          user
         })
       });
 
@@ -645,7 +709,80 @@ export default function App() {
 }
   
   return (
-    <div className="min-h-screen bg-[#f4f7fb] text-slate-900">
+    <>
+      {showChangePass && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-3xl w-full max-w-[420px] shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
+              <h3 className="text-lg font-black text-slate-950">Đổi mật khẩu</h3>
+              <p className="text-sm text-slate-500 mt-1">Mật khẩu mới sẽ được lưu bảo mật tại cột PasswordHash.</p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-sm font-bold text-slate-700 mb-1 block">Mật khẩu cũ</label>
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu hiện tại"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-slate-700 mb-1 block">Mật khẩu mới</label>
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu mới"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-slate-700 mb-1 block">Xác nhận mật khẩu mới</label>
+                <input
+                  type="password"
+                  placeholder="Nhập lại mật khẩu mới"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowChangePass(false);
+                    setOldPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-2xl text-sm font-bold transition"
+                  disabled={changingPassword}
+                >
+                  Hủy
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleChangePassword}
+                  disabled={changingPassword}
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-2xl text-sm font-bold transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {changingPassword && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="min-h-screen bg-[#f4f7fb] text-slate-900">
       <div className="flex min-h-screen">
         <aside className="hidden lg:flex w-[280px] flex-col bg-[#111827] text-white border-r border-white/10">
           <div className="px-6 py-6 border-b border-white/10">
@@ -782,6 +919,14 @@ export default function App() {
   <div className="text-sm text-slate-600 font-semibold ml-2 whitespace-nowrap">
     {user?.hoTen} ({user?.phongBan})
   </div>
+
+  {/* đổi mật khẩu */}
+  <button
+    onClick={() => setShowChangePass(true)}
+    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-sm font-semibold ml-2"
+  >
+    Đổi mật khẩu
+  </button>
 
   {/* logout */}
   <button
@@ -1320,5 +1465,6 @@ export default function App() {
         </main>
       </div>
     </div>
+    </>
   );
 }
