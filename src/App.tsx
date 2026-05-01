@@ -473,7 +473,8 @@ export default function App() {
           SoGiao: Math.max(0, parseFloat(edits[keyNhap]?.SoGiao ?? nv.SoGiao ?? 0) || 0),
           SoHoanThanh: Math.max(0, parseFloat(edits[keyNhap]?.SoHoanThanh ?? nv.SoHoanThanh ?? 0) || 0),
           SoLoiChatLuong: Math.max(0, parseFloat(edits[keyNhap]?.SoLoiChatLuong ?? nv.SoLoiChatLuong ?? 0) || 0),
-          SoCham: Math.max(0, parseFloat(edits[keyNhap]?.SoCham ?? nv.SoCham ?? 0) || 0)
+          SoCham: Math.max(0, parseFloat(edits[keyNhap]?.SoCham ?? nv.SoCham ?? 0) || 0),
+          LastUpdated: nv.LastUpdated || nv.LASTUPDATED || ''
         };
       });
 
@@ -512,8 +513,14 @@ export default function App() {
       });
 
       if (!res.ok) {
-        throw new Error(data.error || 'Lỗi khi lưu dữ liệu');
-      }
+  if (res.status === 409) {
+    alert('⚠️ Dữ liệu đã bị thay đổi ở nơi khác. Hệ thống sẽ tải lại!');
+    await loadNhiemVu(thang, maNhanSu);
+    return;
+  }
+
+  throw new Error(data.error || 'Lỗi khi lưu dữ liệu');
+}
 
       if (isLanhDao) {
         await fetch('/api/save-phutrach', {
@@ -558,7 +565,9 @@ export default function App() {
           e: String(ptData.e ?? 0)
         });
       }
-
+// 🔥 LOAD LẠI DỮ LIỆU (TRÁNH GHI ĐÈ)
+await loadNhiemVu(thang, maNhanSu);
+      
       setEdits({});
     } catch (err: any) {
       setError(err.message);
