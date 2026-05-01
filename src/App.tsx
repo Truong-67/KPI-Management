@@ -160,8 +160,8 @@ export default function App() {
   const [successMsg, setSuccessMsg] = useState<string>('');
   const [conflictKeys, setConflictKeys] = useState<string[]>([]);
   const [conflictInfo, setConflictInfo] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'kpi' | 'tieuchi' | 'tong'>('kpi');
-
+  const [activeTab, setActiveTab] = useState<'kpi' | 'tieuchi' | 'tong' | 'thongke'>('kpi');
+  const [thongKeData, setThongKeData] = useState<any[]>([]);
   const [diemTieuChi, setDiemTieuChi] = useState<Record<string, string>>({});
   const [tongDiem, setTongDiem] = useState(0);
   const [tongTieuChi, setTongTieuChi] = useState(0);
@@ -297,6 +297,21 @@ export default function App() {
 
 }, [thang, maNhanSu, user]);
 
+  useEffect(() => {
+  if (activeTab !== 'thongke' || !thang || !user) return;
+
+  const apiThang = toYYYYMM(thang);
+
+  fetch(`/api/data?action=get-thongke&thang=${apiThang}&user=${encodeURIComponent(JSON.stringify(user))}`)
+    .then(res => res.json())
+    .then(data => {
+      setThongKeData(data || []);
+    })
+    .catch(() => {
+      setThongKeData([]);
+    });
+}, [activeTab, thang]);
+  
   const loadNhiemVu = async (t: string, m: string) => {
     const apiThang = toYYYYMM(t);
     const res = await fetch(`/api/nhiemvu?thang=${apiThang}&maNhanSu=${m}&user=${encodeURIComponent(JSON.stringify(user))}`);
@@ -855,6 +870,18 @@ await loadNhiemVu(thang, maNhanSu);
             >
               <Award className="w-5 h-5" />
               Tổng điểm
+            </button>
+            {/* 🔥 THÊM NÚT NÀY NGAY DƯỚI */}
+                  <button
+                  onClick={() => setActiveTab('thongke')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition ${
+                  activeTab === 'thongke'
+                    ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/25'
+                      : 'text-slate-300 hover:bg-white/10'
+                      }`}
+                    >
+                <BarChart3 className="w-5 h-5" />
+                      Thống kê
             </button>
           </nav>
 
