@@ -1,4 +1,5 @@
 import { readSheet, updateSheet } from './_sheets.js';
+
 // ===============================
 // ===== HELPER PHÂN QUYỀN ======
 // ===============================
@@ -37,6 +38,9 @@ function checkPermission(user: any, targetMaNhanSu: string, dmNhanSu: any[]) {
   return false;
 }
 
+// ===============================
+// ===== MAIN ====================
+// ===============================
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -54,9 +58,10 @@ export default async function handler(req: any, res: any) {
     const data = await readSheet('NHAP_LIEU');
     const dmNhanSu = await getDMNhanSu();
 
-if (!checkPermission(user, maNhanSu, dmNhanSu)) {
-  return res.status(403).json({ error: 'Không có quyền lưu dữ liệu nhân sự này' });
-}
+    if (!checkPermission(user, maNhanSu, dmNhanSu)) {
+      return res.status(403).json({ error: 'Không có quyền lưu dữ liệu nhân sự này' });
+    }
+
     if (!data || data.length === 0) {
       return res.status(200).json({ success: true, a: 0, b: 0, c: 0, kpi: 0 });
     }
@@ -75,6 +80,9 @@ if (!checkPermission(user, maNhanSu, dmNhanSu)) {
     const iLoi = idx('SoLoiChatLuong');
     const iCham = idx('SoCham');
 
+    // 🔥 THÊM CHỈ SỐ CHỐNG GHI ĐÈ
+    const iLastUpdated = idx('LastUpdated');
+
     // ===== LOAD HỆ SỐ =====
     const qdv = await readSheet('QDV');
     const qHeaders = qdv[0];
@@ -87,29 +95,44 @@ if (!checkPermission(user, maNhanSu, dmNhanSu)) {
       heSoMap[r[iMaNV_Q]] = parseFloat(r[iHS_Q]) || 0;
     });
 
-    // ===== UPDATE / INSERT =====
+    // ===============================
+    // ===== UPDATE / INSERT =========
+    // ===============================
     for (const u of updates) {
 
       let rowIndex = data.findIndex((r: any, i: number) =>
         i > 0 && String(r[iKey]).trim() === String(u.KeyNhap).trim()
       );
-      // 🔐 CHECK QUYỀN TRÊN TỪNG DÒNG
-if (rowIndex !== -1) {
-  const oldRow = data[rowIndex];
-  const rowMaNS = oldRow[iMaNS];
 
-  if (!checkPermission(user, rowMaNS, dmNhanSu)) {
-    throw new Error(`Không có quyền sửa KeyNhap: ${u.KeyNhap}`);
-  }
-}
+      // ===== CHECK QUYỀN TRÊN TỪNG DÒNG =====
+      if (rowIndex !== -1) {
+        const oldRow = data[rowIndex];
+        const rowMaNS = oldRow[iMaNS];
 
-      // ===== CASE 1: CHƯA CÓ → TẠO DÒNG =====
-      if (rowIndex === -1) {
-        
-        // 🔐 CHECK QUYỀN TẠO DÒNG MỚI (CHÈN NGAY ĐÂY)
-    if (!checkPermission(user, maNhanSu, dmNhanSu)) {
-    throw new Error('Không có quyền tạo dữ liệu');
+        if (!checkPermission(user, rowMaNS, dmNhanSu)) {
+          throw new Error(`Không có quyền sửa KeyNhap: ${u.KeyNhap}`);
+        }
+
+        // 🔥 CHỐNG GHI ĐÈ
+        const serverTime = String(oldRow[iLastUpdated] || '');
+        const clientTime = String(u.LastUpdated || '');
+
+        if (serverTime && clientTime && serverTime !== clientTime) {
+          return res.status(409).json({
+            error: 'Dữ liệu đã bị thay đổi bởi người khác, vui lòng tải lại!'
+          });
+        }
       }
+
+      // ===============================
+      // ===== CASE 1: INSERT ==========
+      // ===============================
+      if (rowIndex === -1) {
+
+        if (!checkPermission(user, maNhanSu, dmNhanSu)) {
+          throw new Error('Không có quyền tạo dữ liệu');
+        }
+
         const newRow = new Array(headers.length).fill('');
 
         newRow[iKey] = u.KeyNhap;
@@ -122,6 +145,9 @@ if (rowIndex !== -1) {
         newRow[iLoi] = Number(u.SoLoiChatLuong) || 0;
         newRow[iCham] = Number(u.SoCham) || 0;
 
+        // 🔥 GHI TIME
+        newRow[iLastUpdated] = new Date().toISOString();
+
         const newRowNumber = data.length + 1;
 
         const range = `A${newRowNumber}:${String.fromCharCode(65 + headers.length - 1)}${newRowNumber}`;
@@ -132,13 +158,18 @@ if (rowIndex !== -1) {
         continue;
       }
 
-      // ===== CASE 2: ĐÃ CÓ → UPDATE =====
+      // ===============================
+      // ===== CASE 2: UPDATE ==========
+      // ===============================
       const row = [...data[rowIndex]];
 
       if (u.SoGiao !== undefined) row[iGiao] = Number(u.SoGiao);
       if (u.SoHoanThanh !== undefined) row[iHT] = Number(u.SoHoanThanh);
       if (u.SoLoiChatLuong !== undefined) row[iLoi] = Number(u.SoLoiChatLuong);
       if (u.SoCham !== undefined) row[iCham] = Number(u.SoCham);
+
+      // 🔥 UPDATE TIME MỚI
+      row[iLastUpdated] = new Date().toISOString();
 
       const rowNumber = rowIndex + 1;
 
@@ -149,7 +180,9 @@ if (rowIndex !== -1) {
       data[rowIndex] = row;
     }
 
-    // ===== TÍNH KPI =====
+    // ===============================
+    // ===== TÍNH KPI ================
+    // ===============================
     const rows = data.slice(1);
 
     let tongGiaoQD = 0;
