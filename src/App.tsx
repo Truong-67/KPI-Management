@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   Star,
   Shield,
-  FileText
+  FileText,
+  BarChart3
 } from 'lucide-react';
 
 // Helper functions for date conversion
