@@ -29,8 +29,15 @@ const toMMYYYY = (thangAPI: string) => {
   const [yyyy, mm] = thangAPI.split('-');
   return `${mm}/${yyyy}`;
 };
+
+// 🔥 parse số an toàn
+const toNum = (v: any) => {
+  return Number(String(v ?? 0).replace(',', '.'));
+};
+
+// 🔥 format 1 số lẻ chuẩn toàn app
 const format1 = (v: any) => {
-  const num = Number(String(v).replace(',', '.'));
+  const num = toNum(v);
   return isNaN(num) ? '0.0' : num.toFixed(1);
 };
 type TieuChiItem = {
@@ -259,9 +266,9 @@ export default function App() {
 
   useEffect(() => {
     const tongTC = Object.values(diemTieuChi).reduce(
-      (sum: number, v: any) => sum + (Number(v) || 0),
-      0
-    );
+  (sum: number, v: any) => sum + toNum(v),
+  0
+);
 
     setTongTieuChi(tongTC);
 
@@ -1154,7 +1161,7 @@ await loadNhiemVu(thang, maNhanSu);
                   <div className="relative flex items-start justify-between">
                     <div>
                       <p className="text-sm font-semibold text-slate-500">Số lượng (a)</p>
-                      <p className="text-3xl font-black text-slate-950 mt-2">{dataABC.a.toFixed(2)}</p>
+                      <p className="text-3xl font-black text-slate-950 mt-2">{format1(dataABC.a)}</p>
                       <p className="text-xs text-slate-400 mt-1">Tỷ lệ hoàn thành quy đổi</p>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
@@ -1168,7 +1175,7 @@ await loadNhiemVu(thang, maNhanSu);
                   <div className="relative flex items-start justify-between">
                     <div>
                       <p className="text-sm font-semibold text-slate-500">Chất lượng (b)</p>
-                      <p className="text-3xl font-black text-slate-950 mt-2">{dataABC.b.toFixed(2)}</p>
+                      <p className="text-3xl font-black text-slate-950 mt-2">{format1(dataABC.b)}</p>
                       <p className="text-xs text-slate-400 mt-1">Sau khi trừ lỗi chất lượng</p>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/20">
@@ -1182,7 +1189,7 @@ await loadNhiemVu(thang, maNhanSu);
                   <div className="relative flex items-start justify-between">
                     <div>
                       <p className="text-sm font-semibold text-slate-500">Tiến độ (c)</p>
-                      <p className="text-3xl font-black text-slate-950 mt-2">{dataABC.c.toFixed(2)}</p>
+                      <p className="text-3xl font-black text-slate-950 mt-2">{format1(dataABC.c)}</p>
                       <p className="text-xs text-slate-400 mt-1">Sau khi trừ số chậm</p>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
@@ -1197,7 +1204,7 @@ await loadNhiemVu(thang, maNhanSu);
                   <div className="relative flex items-start justify-between">
                     <div>
                       <p className="text-sm font-semibold text-indigo-100">KPI 70%</p>
-                      <p className="text-4xl font-black mt-2">{dataABC.kpi.toFixed(2)}</p>
+                      <p className="text-4xl font-black mt-2">{format1(dataABC.kpi)}</p>
                       <p className="text-xs text-indigo-100 mt-1">Điểm nhiệm vụ tháng</p>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -1449,7 +1456,7 @@ await loadNhiemVu(thang, maNhanSu);
                   </div>
 
                   <div className="px-4 py-2 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-black">
-                    {tongDiemTieuChi.toFixed(2)} / 30
+                    {format1(tongDiemTieuChi)} / 30
                   </div>
                 </div>
 
@@ -1502,7 +1509,7 @@ await loadNhiemVu(thang, maNhanSu);
                         <td className="p-4 text-center font-black">30</td>
                         <td className="p-4 text-center">
                           <div className="text-xl font-black text-emerald-300">
-                            {tongDiemTieuChi.toFixed(2)}
+                            {format1(tongDiemTieuChi)}
                           </div>
                         </td>
                       </tr>
@@ -1532,7 +1539,7 @@ await loadNhiemVu(thang, maNhanSu);
                     </div>
                     <p className="text-sm font-bold text-slate-500">KPI nhiệm vụ (70%)</p>
                     <p className="text-3xl font-black text-slate-950 mt-2">
-                      {kpiPhuTrachData?.kpi?.toFixed(2) || '0.00'}
+                      {format1(kpiPhuTrachData?.kpi)}
                     </p>
                   </div>
 
@@ -1542,7 +1549,7 @@ await loadNhiemVu(thang, maNhanSu);
                     </div>
                     <p className="text-sm font-bold text-slate-500">Tiêu chí chung</p>
                     <p className="text-3xl font-black text-slate-950 mt-2">
-                      {tongTieuChi.toFixed(2)}
+                      {format1(tongTieuChi)}
                     </p>
                   </div>
 
@@ -1554,7 +1561,7 @@ await loadNhiemVu(thang, maNhanSu);
                       </div>
                       <p className="text-sm font-bold text-indigo-100">Tổng điểm (100)</p>
                       <p className="text-4xl font-black mt-2">
-                        {tongDiem.toFixed(2)}
+                        {format1(tongDiem)}
                       </p>
                     </div>
                   </div>
@@ -1619,7 +1626,7 @@ await loadNhiemVu(thang, maNhanSu);
                           <td className="py-2 font-bold">{idx + 1}</td>
                           <td>{row.HoTen}</td>
                           <td className="text-right font-bold text-indigo-600">
-                            {Number(String(row.TongDiem).replace(',', '.')).toFixed(1)}
+                            {format1(row.TongDiem)}
                           </td>
                         </tr>
                       ))}
