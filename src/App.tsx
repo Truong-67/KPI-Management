@@ -40,6 +40,18 @@ const format1 = (v: any) => {
   const num = toNum(v);
   return isNaN(num) ? '0.0' : num.toFixed(1);
 };
+const getTongDiem = (row: any) => {
+  return (
+    row?.TongDiem ??
+    row?.TONG_DIEM ??
+    row?.tongDiem ??
+    row?.Tong_Diem ??
+    row?.['Tổng điểm'] ??
+    row?.KPI ??
+    row?.kpi ??
+    0
+  );
+};
 type TieuChiItem = {
   id: string;
   tt: string;
@@ -330,6 +342,7 @@ export default function App() {
     .then(data => {
       setThongKeData(data || []);
     })
+    console.log('THONG KE DATA:', data);
     .catch(() => {
       setThongKeData([]);
     });
@@ -1626,7 +1639,7 @@ await loadNhiemVu(thang, maNhanSu);
                           <td className="py-2 font-bold">{idx + 1}</td>
                           <td>{row.HoTen}</td>
                           <td className="text-right font-bold text-indigo-600">
-                            {format1(row.TongDiem)}
+                            {format1(getTongDiem(row))}
                           </td>
                         </tr>
                       ))}
