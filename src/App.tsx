@@ -159,6 +159,7 @@ export default function App() {
   const [saving, setSaving] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string>('');
+  const [isLocked, setIsLocked] = useState<boolean>(false);
   const [conflictKeys, setConflictKeys] = useState<string[]>([]);
   const [conflictInfo, setConflictInfo] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'kpi' | 'tieuchi' | 'tong' | 'thongke'>('kpi');
@@ -209,6 +210,20 @@ export default function App() {
       setKpiData(null);
     }
   }, [thang, maNhanSu]);
+  
+  useEffect(() => {
+  if (!thang || !user) return;
+
+  const apiThang = toYYYYMM(thang);
+
+  fetch(`/api/data?action=check-locked&thang=${apiThang}&user=${encodeURIComponent(JSON.stringify(user))}`)
+    .then(res => res.json())
+    .then(data => {
+      setIsLocked(data.locked);
+    })
+    .catch(() => setIsLocked(false));
+
+}, [thang, user]);
 
   useEffect(() => {
     if (thang && maNhanSu) {
@@ -627,6 +642,7 @@ await loadNhiemVu(thang, maNhanSu);
       if (!res.ok) throw new Error(data.error);
 
       setSuccessMsg(`Đã chốt tháng ${thang}`);
+      setIsLocked(true);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -1040,11 +1056,21 @@ await loadNhiemVu(thang, maNhanSu);
 
                   <button
                     onClick={handleChotThang}
-                    disabled={!thang}
-                    className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2.5 rounded-2xl text-sm font-bold transition disabled:opacity-50"
-                  >
+                    disabled={
+                    !thang ||
+                    user?.role !== 'TRUONG_PHONG' && user?.role !== 'PHO_PHONG' ||
+                    isLocked
+                      }
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition ${
+                      !thang ||
+                    user?.role !== 'TRUONG_PHONG' && user?.role !== 'PHO_PHONG' ||
+                    isLocked
+                    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                    : 'bg-violet-600 hover:bg-violet-500 text-white'
+                        }`}
+                    >
                     <Award className="w-4 h-4" />
-                    Chốt
+                    {isLocked ? 'Đã chốt' : 'Chốt'}
                   </button>
 
                   <button
