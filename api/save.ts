@@ -69,8 +69,7 @@ export default async function handler(req: any, res: any) {
   const kRows = kpi.slice(1);
 
   const isLocked = kRows.find(r =>
-    String(r[iK_Thang]).trim() === String(thang).trim() &&
-    String(r[iK_Ma]).trim() === String(maNhanSu).trim()
+    String(r[iK_Thang]).trim() === String(thang).trim()
   );
 
   if (isLocked) {
