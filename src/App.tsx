@@ -634,7 +634,10 @@ await loadNhiemVu(thang, maNhanSu);
       const res = await fetch('/api/chot-thang', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ thang })
+        body: JSON.stringify({
+  thang,
+  user
+})
       });
 
       const data = await res.json();
