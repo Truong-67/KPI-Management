@@ -137,11 +137,8 @@ export default function App() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
   const currentUser = nhanSuList.find(ns => ns.MaNhanSu === maNhanSu);
-
-  const isLanhDao =
-    currentUser?.ChucVu === 'Trưởng phòng' ||
-    currentUser?.ChucVu === 'Phó phòng';
-
+  const role = (user?.role || '').toUpperCase();
+  const isLanhDao = role === 'LANH_DAO_PHONG';
   const [nhiemVu, setNhiemVu] = useState<any[]>([]);
   const [edits, setEdits] = useState<Record<string, any>>({});
   const [kpiData, setKpiData] = useState<{ a: number, b: number, c: number, kpi: number } | null>(null);
