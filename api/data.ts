@@ -354,7 +354,33 @@ if (action === 'get-thongke') {
         )
       );
     }
+// =============================
+// 🔒 CHECK ĐÃ CHỐT
+// =============================
+if (action === 'check-locked') {
 
+  const { thang, user } = req.query;
+
+  const kpi = await readSheet('KPI_LUU_TRU');
+  const headers = kpi[0];
+
+  const getIdx = (name: string) =>
+    headers.findIndex(h => String(h).toLowerCase().includes(name.toLowerCase()));
+
+  const iThang = getIdx('Thang');
+  const iMa = getIdx('MaNhanSu');
+
+  const rows = kpi.slice(1);
+
+  const found = rows.find(r =>
+    String(r[iThang]).trim() === String(thang).trim()
+  );
+
+  return res.status(200).json({
+    locked: !!found
+  });
+}
+    
     return res.status(400).json({ error: 'Invalid action' });
 
   } catch (error: any) {
