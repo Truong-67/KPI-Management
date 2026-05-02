@@ -253,7 +253,7 @@ if (action === 'get-thongke') {
 
   const iKPI_MaNS = getIdx(kpiHeaders, 'MaNhanSu');
   const iKPI_Thang = getIdx(kpiHeaders, 'Thang');
-  const iTong = getIdx(kpiHeaders, 'kpi');
+  const iTong = getIdx(kpiHeaders, 'TONG_DIEM');
 
   const rowsNS = dmNhanSu.slice(1);
   const rowsKPI = kpiData.slice(1);
@@ -276,7 +276,7 @@ if (action === 'get-thongke') {
       return {
         MaNhanSu: ma,
         HoTen: ten,
-        TongDiem: Number(kpiRow?.[iTong] || 0)
+        TongDiem: Number(String(kpiRow?.[iTong] || 0).replace(',', '.'))
       };
     })
     .sort((a, b) => b.TongDiem - a.TongDiem);
