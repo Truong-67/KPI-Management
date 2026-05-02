@@ -869,8 +869,8 @@ await loadNhiemVu(thang, maNhanSu);
                 <Activity className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight">KPI Center</h1>
-                <p className="text-xs text-slate-400">Quản trị hiệu suất</p>
+                <h1 className="text-lg font-bold text-white">KPI Center - TTQTTN&MT</h1>
+                
               </div>
             </div>
           </div>
@@ -955,9 +955,7 @@ await loadNhiemVu(thang, maNhanSu);
                   <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-950">
                     Theo dõi hiệu suất tháng
                   </h2>
-                  <p className="text-sm text-slate-500 mt-1">
-                    Nhập số liệu nhiệm vụ, đánh giá tiêu chí và tổng hợp điểm KPI.
-                  </p>
+               
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
