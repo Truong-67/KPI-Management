@@ -923,6 +923,27 @@ await loadNhiemVu(thang, maNhanSu);
                 <BarChart3 className="w-5 h-5" />
                       Thống kê
             </button>
+            <div className="mt-6 pt-4 border-t border-white/10 space-y-2">
+
+  <button
+    onClick={() => setShowChangePass(true)}
+    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-300 hover:bg-white/10 transition"
+  >
+    🔒 Đổi mật khẩu
+  </button>
+
+  <button
+    onClick={() => {
+      localStorage.removeItem('kpi_user');
+      setUser(null);
+      setMaNhanSu('');
+    }}
+    className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-red-400 hover:bg-red-500/10 transition"
+  >
+    🚪 Đăng xuất
+  </button>
+
+</div>
           </nav>
 
           <div className="p-4">
@@ -1009,25 +1030,25 @@ await loadNhiemVu(thang, maNhanSu);
   </div>
 
   {/* đổi mật khẩu */}
-  <button
-    onClick={() => setShowChangePass(true)}
-    className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-sm font-semibold ml-2"
-  >
-    Đổi mật khẩu
-  </button>
+  {/*
+<button
+  onClick={() => setShowChangePass(true)}
+  className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-xl text-sm font-semibold ml-2"
+>
+  Đổi mật khẩu
+</button>
 
-  {/* logout */}
-  <button
-    onClick={() => {
-      localStorage.removeItem('kpi_user');
-      setUser(null);
-      setMaNhanSu('');
-    }}
-    className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-xl text-sm font-semibold ml-2"
-  >
-    Đăng xuất
-  </button>
-
+<button
+  onClick={() => {
+    localStorage.removeItem('kpi_user');
+    setUser(null);
+    setMaNhanSu('');
+  }}
+  className="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-xl text-sm font-semibold ml-2"
+>
+  Đăng xuất
+</button>
+*/}
 </div>
 </div>
 
