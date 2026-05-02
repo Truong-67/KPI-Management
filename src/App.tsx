@@ -29,7 +29,10 @@ const toMMYYYY = (thangAPI: string) => {
   const [yyyy, mm] = thangAPI.split('-');
   return `${mm}/${yyyy}`;
 };
-
+const format1 = (v: any) => {
+  const num = Number(String(v).replace(',', '.'));
+  return isNaN(num) ? '0.0' : num.toFixed(1);
+};
 type TieuChiItem = {
   id: string;
   tt: string;
@@ -1616,7 +1619,7 @@ await loadNhiemVu(thang, maNhanSu);
                           <td className="py-2 font-bold">{idx + 1}</td>
                           <td>{row.HoTen}</td>
                           <td className="text-right font-bold text-indigo-600">
-                            {Number(row.TongDiem || 0).toFixed(2)}
+                            {Number(String(row.TongDiem).replace(',', '.')).toFixed(1)}
                           </td>
                         </tr>
                       ))}
