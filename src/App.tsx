@@ -342,7 +342,7 @@ export default function App() {
     .then(data => {
       setThongKeData(data || []);
     })
-    console.log('THONG KE DATA:', data);
+    
     .catch(() => {
       setThongKeData([]);
     });
