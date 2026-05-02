@@ -326,7 +326,7 @@ export default function App() {
     .catch(() => {
       setThongKeData([]);
     });
-}, [activeTab, thang]);
+}, [activeTab, thang, user]);
   
   const loadNhiemVu = async (t: string, m: string) => {
     const apiThang = toYYYYMM(t);
@@ -1055,23 +1055,23 @@ await loadNhiemVu(thang, maNhanSu);
                   </button>
 
                   <button
-                    onClick={handleChotThang}
-                    disabled={
-                    !thang ||
-                    user?.role !== 'TRUONG_PHONG' && user?.role !== 'PHO_PHONG' ||
-                    isLocked
-                      }
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition ${
-                      !thang ||
-                    user?.role !== 'TRUONG_PHONG' && user?.role !== 'PHO_PHONG' ||
-                    isLocked
-                    ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-                    : 'bg-violet-600 hover:bg-violet-500 text-white'
-                        }`}
-                    >
-                    <Award className="w-4 h-4" />
-                    {isLocked ? 'Đã chốt' : 'Chốt'}
-                  </button>
+  onClick={handleChotThang}
+  disabled={
+    !thang ||
+    !isLanhDao ||
+    isLocked
+  }
+  className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition ${
+    !thang ||
+    !isLanhDao ||
+    isLocked
+      ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+      : 'bg-violet-600 hover:bg-violet-500 text-white'
+  }`}
+>
+  <Award className="w-4 h-4" />
+  {isLocked ? 'Đã chốt' : 'Chốt'}
+</button>
 
                   <button
                     onClick={handleResetThang}
