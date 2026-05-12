@@ -353,7 +353,7 @@ export default function App() {
     const res = await fetch(`/api/nhiemvu?thang=${apiThang}&maNhanSu=${m}&user=${encodeURIComponent(JSON.stringify(user))}`);
     if (!res.ok) throw new Error('Lỗi khi tải nhiệm vụ');
     const data = await res.json();
-    setNhiemVu(data);
+    setNhiemVu(Array.isArray(data) ? data : []);
     setEdits({});
     setConflictKeys([]);
     setConflictInfo([]);
@@ -390,10 +390,22 @@ export default function App() {
   const handleNhanSuChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMa = e.target.value;
     setMaNhanSu(newMa);
-    setSuccessMsg('');
+setSuccessMsg('');
 
-    setNhiemVu([]);
-    setEdits({});
+// 🔥 reset sạch dữ liệu user cũ
+setNhiemVu([]);
+setEdits({});
+setKpiData(null);
+setKpiPhuTrachData(null);
+
+setPtInputs({
+  d: '',
+  dd: '',
+  e: ''
+});
+
+setConflictKeys([]);
+setConflictInfo([]);
 
     if (!thang || !newMa) return;
 
