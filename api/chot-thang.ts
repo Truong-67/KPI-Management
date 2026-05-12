@@ -105,8 +105,13 @@ export default async function handler(req: any, res: any) {
 
     const qHeaders = qdv[0];
 
-    const iQ_Ma = getIdx(qHeaders, 'MaNhiemVu');
-    const iQ_HS = getIdx(qHeaders, 'QuyDoi');
+    const iQ_Ma = qHeaders.findIndex((h: any) =>
+  String(h).trim().toLowerCase().includes('manhiemvu')
+);
+
+const iQ_HS = qHeaders.findIndex((h: any) =>
+  String(h).trim().toLowerCase().includes('quydoi')
+);
 
     const heSoMap: any = {};
 
