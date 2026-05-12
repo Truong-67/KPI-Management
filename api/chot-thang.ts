@@ -225,14 +225,11 @@ let d = 0;
 let dd = 0;
 let e = 0;
 
-// 🔥 tìm đúng nhân sự hiện tại
-const userInfo = dsPhong.find(
-  x => String(x[iMa]).trim() === ma
-);
+// 🔥 d đ e chỉ áp dụng cho lãnh đạo
+let d = 0;
+let dd = 0;
+let e = 0;
 
-const userRole = String(userInfo?.[iRole] || '').trim();
-
-// 🔥 chỉ lãnh đạo mới có d đ e
 if (
   userRole === 'TRUONG_PHONG' ||
   userRole === 'PHO_PHONG'
