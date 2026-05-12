@@ -640,12 +640,22 @@ await loadNhiemVu(thang, maNhanSu);
 })
       });
 
-      const data = await res.json();
+      let data: any;
 
-      if (!res.ok) throw new Error(data.error);
+try {
+  data = await res.json();
+} catch {
+  const txt = await res.text();
+  throw new Error(txt || 'API không trả về JSON');
+}
 
-      setSuccessMsg(`Đã chốt tháng ${thang}`);
-      setIsLocked(true);
+if (!res.ok) {
+  throw new Error(data?.error || 'Lỗi chốt tháng');
+}
+
+setSuccessMsg(`Đã chốt tháng ${thang}`);
+setIsLocked(true);
+      
     } catch (err: any) {
       setError(err.message);
     } finally {
