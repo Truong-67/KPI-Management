@@ -274,8 +274,11 @@ newRows.push([
       message: `Đã chốt ${newRows.length} nhân sự phòng ${phongBan}`
     });
 
-  } catch (err: any) {
-    console.error('ERROR CHOT:', err);
-    return res.status(500).json({ error: err.message });
-  }
+  catch (err: any) {
+  console.error('ERROR CHOT:', err);
+
+  return res.status(500).json({
+    success: false,
+    error: String(err?.message || err)
+  });
 }
