@@ -373,8 +373,10 @@ if (action === 'check-locked') {
   const rows = kpi.slice(1);
 
   const found = rows.find(r =>
-    String(r[iThang]).trim() === String(thang).trim()
-  );
+  String(r[iThang]).trim() === String(thang).trim() &&
+  String(r[iMa]).trim() === String(user.maNhanSu).trim() &&
+  String(r[headers.indexOf('TRANG_THAI')] || '').trim() === 'DA_CHOT'
+);
 
   return res.status(200).json({
     locked: !!found
