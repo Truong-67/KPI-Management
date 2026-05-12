@@ -547,26 +547,6 @@ export default function App() {
 
       const data = await res.json();
 
-      await fetch('/api/save-kpi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          thang: thang,
-          maNhanSu: maNhanSu,
-          hoTen: currentUser?.HoTen || '',
-
-          a: data?.a,
-          b: data?.b,
-          c: data?.c,
-
-          d: isLanhDao ? Number(ptInputs.d) || 0 : 0,
-          dd: isLanhDao ? Number(ptInputs.dd) || 0 : 0,
-          e: isLanhDao ? Number(ptInputs.e) || 0 : 0,
-
-          kpi: data?.kpi
-        })
-      });
-
       if (!res.ok) {
   if (res.status === 409) {
     const keys = data.conflictKeys || [];
