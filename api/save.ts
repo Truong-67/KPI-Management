@@ -56,7 +56,10 @@ export default async function handler(req: any, res: any) {
 
   try {
     const data = await readSheet('NHAP_LIEU');
-    const kpiData = await readSheet('KPI_LUU_TRU');
+const kpiData = await readSheet('KPI_LUU_TRU');
+
+// 🔥 LOAD NHÂN SỰ TRƯỚC
+const dmNhanSu = await getDMNhanSu();
 
 if (kpiData && kpiData.length > 1) {
 
@@ -101,8 +104,7 @@ if (kpiData && kpiData.length > 1) {
     });
   }
 }
-    const dmNhanSu = await getDMNhanSu();
-
+    
     if (!checkPermission(user, maNhanSu, dmNhanSu)) {
       return res.status(403).json({ error: 'Không có quyền lưu dữ liệu nhân sự này' });
     }
