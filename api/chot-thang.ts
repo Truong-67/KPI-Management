@@ -18,7 +18,7 @@ export default async function handler(req: any, res: any) {
     });
   }
 
-  // YYYY-MM → MM/YYYY
+  // YYYY-MM -> MM/YYYY
   if (thang.includes('-')) {
     const [yyyy, mm] = thang.split('-');
     thang = `${mm}/${yyyy}`;
@@ -29,26 +29,28 @@ export default async function handler(req: any, res: any) {
     // =====================================================
     // HELPER
     // =====================================================
+
     const getIdx = (arr: any[], name: string) =>
-      arr.findIndex(h =>
-        String(h).trim().toLowerCase() === name.toLowerCase()
+      arr.findIndex(
+        h => String(h).trim().toLowerCase() === name.toLowerCase()
       );
 
     // =====================================================
     // LOAD DM_NHAN_SU
     // =====================================================
+
     const dm = await readSheet('DM_NHAN_SU');
 
     const dmHeaders = dm[0];
     const dmRows = dm.slice(1);
 
-    const iMa = getIdx(dmHeaders, 'MaNhanSu');
-    const iTen = getIdx(dmHeaders, 'HoTen');
-    const iPhong = getIdx(dmHeaders, 'Phong');
-    const iRole = getIdx(dmHeaders, 'VaiTro');
+    const iDM_Ma = getIdx(dmHeaders, 'MaNhanSu');
+    const iDM_Ten = getIdx(dmHeaders, 'HoTen');
+    const iDM_Phong = getIdx(dmHeaders, 'Phong');
+    const iDM_Role = getIdx(dmHeaders, 'VaiTro');
 
     const currentUser = dmRows.find(
-      r => String(r[iMa]).trim() === String(user.maNhanSu).trim()
+      r => String(r[iDM_Ma]).trim() === String(user.maNhanSu).trim()
     );
 
     if (!currentUser) {
@@ -58,31 +60,31 @@ export default async function handler(req: any, res: any) {
       });
     }
 
-    const role = String(currentUser[iRole]).trim();
-    const phongBan = String(currentUser[iPhong]).trim();
+    const role = String(currentUser[iDM_Role]).trim();
+    const phongBan = String(currentUser[iDM_Phong]).trim();
 
-    // Chỉ lãnh đạo được chốt
     if (
       role !== 'TRUONG_PHONG' &&
       role !== 'PHO_PHONG'
     ) {
       return res.status(403).json({
         success: false,
-        error: 'Chỉ lãnh đạo phòng được chốt'
+        error: 'Chỉ lãnh đạo được chốt'
       });
     }
 
     // =====================================================
     // LOAD NHAP_LIEU
     // =====================================================
+
     const data = await readSheet('NHAP_LIEU');
 
     const headers = data[0];
     const rows = data.slice(1);
 
     const idx = (name: string) =>
-      headers.findIndex(h =>
-        String(h).trim().toLowerCase() === name.toLowerCase()
+      headers.findIndex(
+        h => String(h).trim().toLowerCase() === name.toLowerCase()
       );
 
     const iThang = idx('Thang');
@@ -98,26 +100,28 @@ export default async function handler(req: any, res: any) {
     // =====================================================
     // LOAD QDV
     // =====================================================
+
     const qdv = await readSheet('QDV');
 
     const qHeaders = qdv[0];
 
-    const iMaNV_Q = getIdx(qHeaders, 'MaNhiemVu');
-    const iHS_Q = getIdx(qHeaders, 'QuyDoi');
+    const iQ_Ma = getIdx(qHeaders, 'MaNhiemVu');
+    const iQ_HS = getIdx(qHeaders, 'QuyDoi');
 
     const heSoMap: any = {};
 
     qdv.slice(1).forEach(r => {
 
-      const maNV = String(r[iMaNV_Q]).trim();
+      const ma = String(r[iQ_Ma]).trim();
 
-      heSoMap[maNV] = Number(r[iHS_Q]) || 0;
+      heSoMap[ma] = Number(r[iQ_HS]) || 0;
 
     });
 
     // =====================================================
     // LOAD TIÊU CHÍ CHUNG
     // =====================================================
+
     const tc = await readSheet('TIEU_CHI_CHUNG');
 
     const tcHeaders = tc[0];
@@ -128,66 +132,52 @@ export default async function handler(req: any, res: any) {
     const iTC_Diem = getIdx(tcHeaders, 'Diem');
 
     // =====================================================
+    // LOAD NHAP_DIEM_PHU_TRACH
+    // =====================================================
+
+    const pt = await readSheet('NHAP_DIEM_PHU_TRACH');
+
+    const ptHeaders = pt[0];
+    const ptRows = pt.slice(1);
+
+    const iPT_Thang = getIdx(ptHeaders, 'Thang');
+    const iPT_Ma = getIdx(ptHeaders, 'MaNhanSu');
+
+    const iPT_d = getIdx(ptHeaders, 'd');
+    const iPT_dd = getIdx(ptHeaders, 'dd');
+    const iPT_e = getIdx(ptHeaders, 'e');
+
+    // =====================================================
     // LOAD KPI_LUU_TRU
     // =====================================================
-    const kpiOld = await readSheet('KPI_LUU_TRU');
 
-    const kHeaders = kpiOld[0];
-    const kRows = kpiOld.slice(1);
+    const kpiSheet = await readSheet('KPI_LUU_TRU');
+
+    const kHeaders = kpiSheet[0];
+    const kRows = kpiSheet.slice(1);
 
     const iK_Thang = getIdx(kHeaders, 'Thang');
     const iK_Ma = getIdx(kHeaders, 'MaNhanSu');
 
     // =====================================================
-    // NHÂN SỰ TRONG PHÒNG
+    // DS PHÒNG
     // =====================================================
+
     const dsPhong = dmRows.filter(
-      r => String(r[iPhong]).trim() === phongBan
+      r => String(r[iDM_Phong]).trim() === phongBan
     );
 
     // =====================================================
-    // TẠO USER MAP
+    // NEW ROWS
     // =====================================================
-    const userMap: any = {};
 
-    rows.forEach(r => {
-
-      if (String(r[iThang]).trim() !== thang) return;
-
-      const ma = String(r[iMaNS]).trim();
-
-      const inPhong = dsPhong.find(
-        x => String(x[iMa]).trim() === ma
-      );
-
-      if (!inPhong) return;
-
-      if (!userMap[ma]) {
-
-        userMap[ma] = {
-          hoTen: String(r[iHoTen]).trim()
-        };
-
-      }
-
-    });
-
-    // =====================================================
-    // TÍNH KPI
-    // =====================================================
     const newRows: any[] = [];
 
-    Object.keys(userMap).forEach(ma => {
+    dsPhong.forEach(nv => {
 
-      // =================================================
-      // TRÁNH CHỐT TRÙNG
-      // =================================================
-      const exists = kRows.find(r =>
-        String(r[iK_Thang]).trim() === thang &&
-        String(r[iK_Ma]).trim() === ma
-      );
-
-      if (exists) return;
+      const ma = String(nv[iDM_Ma]).trim();
+      const hoTen = String(nv[iDM_Ten]).trim();
+      const vaiTro = String(nv[iDM_Role]).trim();
 
       let tongGiaoQD = 0;
       let tongHTQD = 0;
@@ -197,6 +187,7 @@ export default async function handler(req: any, res: any) {
       // =================================================
       // QUÉT NHẬP LIỆU
       // =================================================
+
       rows.forEach(r => {
 
         if (
@@ -211,15 +202,15 @@ export default async function handler(req: any, res: any) {
 
         const maNV = String(r[iMaNV]).trim();
 
-        const heSo = heSoMap[maNV] || 0;
+        const hs = heSoMap[maNV] || 0;
 
-        const giaoQD = soGiao * heSo;
-        const htQD = soHT * heSo;
+        const giaoQD = soGiao * hs;
+        const htQD = soHT * hs;
 
-        let clQD = htQD - soLoi * heSo * 0.25;
+        let clQD = htQD - soLoi * hs * 0.25;
         if (clQD < 0) clQD = 0;
 
-        let tdQD = htQD - soCham * heSo * 0.25;
+        let tdQD = htQD - soCham * hs * 0.25;
         if (tdQD < 0) tdQD = 0;
 
         tongGiaoQD += giaoQD;
@@ -230,8 +221,9 @@ export default async function handler(req: any, res: any) {
       });
 
       // =================================================
-      // KPI A B C
+      // KPI ABC
       // =================================================
+
       const a =
         tongGiaoQD === 0
           ? 0
@@ -248,31 +240,44 @@ export default async function handler(req: any, res: any) {
           : (tongTDQD / tongGiaoQD) * 100;
 
       // =================================================
-      // ROLE
+      // PHỤ TRÁCH
       // =================================================
-      const userInfo = dsPhong.find(
-        x => String(x[iMa]).trim() === ma
-      );
-
-      const userRole = String(userInfo?.[iRole] || '').trim();
 
       let d = 0;
       let dd = 0;
       let e = 0;
 
-      let kpi = 0;
-
-      // =================================================
-      // KPI LÃNH ĐẠO
-      // =================================================
       if (
-        userRole === 'TRUONG_PHONG' ||
-        userRole === 'PHO_PHONG'
+        vaiTro === 'TRUONG_PHONG' ||
+        vaiTro === 'PHO_PHONG'
       ) {
 
-        d = 100;
-        dd = 100;
-        e = 100;
+        const ptRow = ptRows.find(
+          r =>
+            String(r[iPT_Thang]).trim() === thang &&
+            String(r[iPT_Ma]).trim() === ma
+        );
+
+        if (ptRow) {
+
+          d = Number(ptRow[iPT_d]) || 0;
+          dd = Number(ptRow[iPT_dd]) || 0;
+          e = Number(ptRow[iPT_e]) || 0;
+
+        }
+
+      }
+
+      // =================================================
+      // KPI
+      // =================================================
+
+      let kpi = 0;
+
+      if (
+        vaiTro === 'TRUONG_PHONG' ||
+        vaiTro === 'PHO_PHONG'
+      ) {
 
         kpi =
           ((a + b + c + d + dd + e) / 6) *
@@ -287,8 +292,9 @@ export default async function handler(req: any, res: any) {
       }
 
       // =================================================
-      // TIÊU CHÍ CHUNG
+      // TIÊU CHÍ
       // =================================================
+
       let tongTieuChi = 0;
 
       tcRows.forEach(t => {
@@ -305,18 +311,20 @@ export default async function handler(req: any, res: any) {
       });
 
       // =================================================
-      // TỔNG ĐIỂM
+      // TỔNG
       // =================================================
+
       const tongDiem = kpi + tongTieuChi;
 
       // =================================================
       // PUSH
       // =================================================
+
       newRows.push([
 
         thang,
         ma,
-        userMap[ma].hoTen,
+        hoTen,
 
         Number(a.toFixed(4)),
         Number(b.toFixed(4)),
@@ -336,8 +344,9 @@ export default async function handler(req: any, res: any) {
     });
 
     // =====================================================
-    // APPEND KPI_LUU_TRU
+    // GHI SHEET
     // =====================================================
+
     if (newRows.length > 0) {
 
       const startRow = kRows.length + 2;
@@ -356,6 +365,7 @@ export default async function handler(req: any, res: any) {
     // =====================================================
     // SUCCESS
     // =====================================================
+
     return res.status(200).json({
 
       success: true,
