@@ -1232,7 +1232,13 @@ setIsLocked(true);
                   <div className="relative flex items-start justify-between">
                     <div>
                       <p className="text-sm font-semibold text-indigo-100">KPI 70%</p>
-                      <p className="text-4xl font-black mt-2">{format1(dataABC.kpi)}</p>
+                      <p className="text-4xl font-black mt-2">
+                        {format1(
+                        isLanhDao
+                        ? kpiPhuTrachData?.kpi
+                        : dataABC.kpi
+                        )}
+                      </p>
                       <p className="text-xs text-indigo-100 mt-1">Điểm nhiệm vụ tháng</p>
                     </div>
                     <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
