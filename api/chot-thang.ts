@@ -179,34 +179,31 @@ export default async function handler(req: any, res: any) {
       const b = tongGiaoQD === 0 ? 0 : (tongCLQD / tongGiaoQD) * 100;
       const c = tongGiaoQD === 0 ? 0 : (tongTDQD / tongGiaoQD) * 100;
 
-      let kpi = 0;
-
-// 🔥 nhân sự hiện tại
+      // 🔥 nhân sự hiện tại
 const userInfo = dsPhong.find(
   x => String(x[iMa]).trim() === ma
 );
 
 const userRole = String(userInfo?.[iRole] || '').trim();
 
+let d = 0;
+let dd = 0;
+let e = 0;
+let kpi = 0;
+
 // 🔥 lãnh đạo
 if (
   userRole === 'TRUONG_PHONG' ||
   userRole === 'PHO_PHONG'
 ) {
-
   d = 100;
   dd = 100;
   e = 100;
 
-  kpi =
-    ((a + b + c + d + dd + e) / 6) * 70 / 100;
-
+  kpi = ((a + b + c + d + dd + e) / 6) * 70 / 100;
 } else {
-
-  kpi =
-    ((a + b + c) / 3) * 70 / 100;
+  kpi = ((a + b + c) / 3) * 70 / 100;
 }
-
       // 🔥 TÍNH TIÊU CHÍ
       let tongTieuChi = 0;
       tcRows.forEach(t => {
@@ -250,11 +247,11 @@ newRows.push([
     }
 
     return res.status(200).json({
-      success: true,
-      message: `Đã chốt ${newRows.length} nhân sự phòng ${phongBan}`
-    });
+  success: true,
+  message: `Đã chốt ${newRows.length} nhân sự phòng ${phongBan}`
+});
 
-  catch (err: any) {
+} catch (err: any) {
   console.error('ERROR CHOT:', err);
 
   return res.status(500).json({
