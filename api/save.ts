@@ -57,19 +57,25 @@ export default async function handler(req: any, res: any) {
   try {
     const data = await readSheet('NHAP_LIEU');
     const kpiData = await readSheet('KPI_LUU_TRU');
-  if (kpiData && kpiData.length > 1) {
+
+if (kpiData && kpiData.length > 1) {
+
   const kHeaders = kpiData[0];
 
   const getIdx = (name: string) =>
-    kHeaders.findIndex(h => String(h).toLowerCase().includes(name.toLowerCase()));
+    kHeaders.findIndex(h =>
+      String(h).toLowerCase().includes(name.toLowerCase())
+    );
 
   const iK_Thang = getIdx('Thang');
-  const iK_Ma = getIdx('MaNhanSu');
+  const iK_TrangThai = getIdx('TRANG_THAI');
 
   const kRows = kpiData.slice(1);
 
+  // 🔥 CHỈ KHÓA KHI ĐÃ CHỐT
   const isLocked = kRows.find(r =>
-    String(r[iK_Thang]).trim() === String(thang).trim()
+    String(r[iK_Thang]).trim() === String(thang).trim() &&
+    String(r[iK_TrangThai]).trim() === 'DA_CHOT'
   );
 
   if (isLocked) {
