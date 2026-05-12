@@ -1117,8 +1117,14 @@ await loadNhiemVu(thang, maNhanSu);
 
                   <button
                     onClick={handleResetThang}
-                    className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 rounded-2xl text-sm font-bold transition"
-                  >
+                    disabled={!isLanhDao}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-bold transition ${
+                      !isLanhDao
+                        ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                        : 'bg-rose-600 hover:bg-rose-500 text-white'
+                      }`}
+                    >
+                    
                     <AlertCircle className="w-4 h-4" />
                     Reset
                   </button>
