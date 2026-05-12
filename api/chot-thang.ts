@@ -1,14 +1,21 @@
 import { readSheet, updateSheet } from './_sheets.js';
 
 export default async function handler(req: any, res: any) {
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({
+      success: false,
+      error: 'Method not allowed'
+    });
   }
 
   let { thang, user } = req.body;
 
   if (!thang || !user) {
-    return res.status(400).json({ error: 'Missing thang or user' });
+    return res.status(400).json({
+      success: false,
+      error: 'Missing thang or user'
+    });
   }
 
   // YYYY-MM → MM/YYYY
@@ -18,13 +25,20 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const getIdx = (arr: any[], name: string) =>
-      arr.findIndex(h => String(h).toLowerCase().includes(name.toLowerCase()));
 
-    // =========================
-    // 🔐 LOAD DM_NHAN_SU
-    // =========================
+    // =====================================================
+    // HELPER
+    // =====================================================
+    const getIdx = (arr: any[], name: string) =>
+      arr.findIndex(h =>
+        String(h).trim().toLowerCase() === name.toLowerCase()
+      );
+
+    // =====================================================
+    // LOAD DM_NHAN_SU
+    // =====================================================
     const dm = await readSheet('DM_NHAN_SU');
+
     const dmHeaders = dm[0];
     const dmRows = dm.slice(1);
 
@@ -38,108 +52,141 @@ export default async function handler(req: any, res: any) {
     );
 
     if (!currentUser) {
-      return res.status(403).json({ error: 'User không tồn tại' });
+      return res.status(403).json({
+        success: false,
+        error: 'User không tồn tại'
+      });
     }
 
     const role = String(currentUser[iRole]).trim();
     const phongBan = String(currentUser[iPhong]).trim();
 
-    if (role !== 'TRUONG_PHONG' && role !== 'PHO_PHONG') {
-      return res.status(403).json({ error: 'Chỉ lãnh đạo phòng được chốt' });
+    // Chỉ lãnh đạo được chốt
+    if (
+      role !== 'TRUONG_PHONG' &&
+      role !== 'PHO_PHONG'
+    ) {
+      return res.status(403).json({
+        success: false,
+        error: 'Chỉ lãnh đạo phòng được chốt'
+      });
     }
 
-    // =========================
-    // 📌 LOAD NHAP_LIEU
-    // =========================
+    // =====================================================
+    // LOAD NHAP_LIEU
+    // =====================================================
     const data = await readSheet('NHAP_LIEU');
+
     const headers = data[0];
     const rows = data.slice(1);
 
     const idx = (name: string) =>
-      headers.findIndex(h => String(h).toLowerCase() === name.toLowerCase());
+      headers.findIndex(h =>
+        String(h).trim().toLowerCase() === name.toLowerCase()
+      );
 
     const iThang = idx('Thang');
     const iMaNS = idx('MaNhanSu');
     const iHoTen = idx('HoTen');
     const iMaNV = idx('MaNhiemVu');
+
     const iGiao = idx('SoGiao');
     const iHT = idx('SoHoanThanh');
     const iLoi = idx('SoLoiChatLuong');
     const iCham = idx('SoCham');
 
-    // =========================
-    // 📌 LOAD QDV
-    // =========================
+    // =====================================================
+    // LOAD QDV
+    // =====================================================
     const qdv = await readSheet('QDV');
+
     const qHeaders = qdv[0];
 
-    const iMaNV_Q = getIdx(qHeaders, 'manhiemvu');
-    const iHS_Q = getIdx(qHeaders, 'quydoi');
+    const iMaNV_Q = getIdx(qHeaders, 'MaNhiemVu');
+    const iHS_Q = getIdx(qHeaders, 'QuyDoi');
 
     const heSoMap: any = {};
+
     qdv.slice(1).forEach(r => {
-      heSoMap[String(r[iMaNV_Q]).trim()] = Number(r[iHS_Q]) || 0;
+
+      const maNV = String(r[iMaNV_Q]).trim();
+
+      heSoMap[maNV] = Number(r[iHS_Q]) || 0;
+
     });
 
-    // =========================
-    // 📌 LOAD TIÊU CHÍ CHUNG
-    // =========================
+    // =====================================================
+    // LOAD TIÊU CHÍ CHUNG
+    // =====================================================
     const tc = await readSheet('TIEU_CHI_CHUNG');
+
     const tcHeaders = tc[0];
+    const tcRows = tc.slice(1);
 
     const iTC_Thang = getIdx(tcHeaders, 'Thang');
     const iTC_Ma = getIdx(tcHeaders, 'MaNhanSu');
     const iTC_Diem = getIdx(tcHeaders, 'Diem');
 
-    const tcRows = tc.slice(1);
-
-    // =========================
-    // 📌 LOAD KPI_LUU_TRU
-    // =========================
+    // =====================================================
+    // LOAD KPI_LUU_TRU
+    // =====================================================
     const kpiOld = await readSheet('KPI_LUU_TRU');
-    const kHeaders = kpiOld?.[0] || [];
+
+    const kHeaders = kpiOld[0];
+    const kRows = kpiOld.slice(1);
 
     const iK_Thang = getIdx(kHeaders, 'Thang');
     const iK_Ma = getIdx(kHeaders, 'MaNhanSu');
 
-    const kRows = kpiOld?.slice(1) || [];
-
-    // =========================
-    // 📌 LỌC NHÂN SỰ TRONG PHÒNG
-    // =========================
+    // =====================================================
+    // NHÂN SỰ TRONG PHÒNG
+    // =====================================================
     const dsPhong = dmRows.filter(
       r => String(r[iPhong]).trim() === phongBan
     );
 
+    // =====================================================
+    // TẠO USER MAP
+    // =====================================================
     const userMap: any = {};
 
     rows.forEach(r => {
+
       if (String(r[iThang]).trim() !== thang) return;
 
       const ma = String(r[iMaNS]).trim();
 
-      const inPhong = dsPhong.find(x => String(x[iMa]).trim() === ma);
+      const inPhong = dsPhong.find(
+        x => String(x[iMa]).trim() === ma
+      );
+
       if (!inPhong) return;
 
       if (!userMap[ma]) {
+
         userMap[ma] = {
           hoTen: String(r[iHoTen]).trim()
         };
+
       }
+
     });
 
-    // =========================
-    // 📌 TÍNH KPI + TIÊU CHÍ
-    // =========================
+    // =====================================================
+    // TÍNH KPI
+    // =====================================================
     const newRows: any[] = [];
 
     Object.keys(userMap).forEach(ma => {
 
-      // ❌ tránh trùng
+      // =================================================
+      // TRÁNH CHỐT TRÙNG
+      // =================================================
       const exists = kRows.find(r =>
         String(r[iK_Thang]).trim() === thang &&
         String(r[iK_Ma]).trim() === ma
       );
+
       if (exists) return;
 
       let tongGiaoQD = 0;
@@ -147,7 +194,11 @@ export default async function handler(req: any, res: any) {
       let tongCLQD = 0;
       let tongTDQD = 0;
 
+      // =================================================
+      // QUÉT NHẬP LIỆU
+      // =================================================
       rows.forEach(r => {
+
         if (
           String(r[iThang]).trim() !== thang ||
           String(r[iMaNS]).trim() !== ma
@@ -158,7 +209,9 @@ export default async function handler(req: any, res: any) {
         const soLoi = Number(r[iLoi]) || 0;
         const soCham = Number(r[iCham]) || 0;
 
-        const heSo = heSoMap[String(r[iMaNV]).trim()] || 0;
+        const maNV = String(r[iMaNV]).trim();
+
+        const heSo = heSoMap[maNV] || 0;
 
         const giaoQD = soGiao * heSo;
         const htQD = soHT * heSo;
@@ -173,89 +226,157 @@ export default async function handler(req: any, res: any) {
         tongHTQD += htQD;
         tongCLQD += clQD;
         tongTDQD += tdQD;
+
       });
 
-      const a = tongGiaoQD === 0 ? 0 : (tongHTQD / tongGiaoQD) * 100;
-      const b = tongGiaoQD === 0 ? 0 : (tongCLQD / tongGiaoQD) * 100;
-      const c = tongGiaoQD === 0 ? 0 : (tongTDQD / tongGiaoQD) * 100;
+      // =================================================
+      // KPI A B C
+      // =================================================
+      const a =
+        tongGiaoQD === 0
+          ? 0
+          : (tongHTQD / tongGiaoQD) * 100;
 
-      // 🔥 nhân sự hiện tại
-const userInfo = dsPhong.find(
-  x => String(x[iMa]).trim() === ma
-);
+      const b =
+        tongGiaoQD === 0
+          ? 0
+          : (tongCLQD / tongGiaoQD) * 100;
 
-const userRole = String(userInfo?.[iRole] || '').trim();
+      const c =
+        tongGiaoQD === 0
+          ? 0
+          : (tongTDQD / tongGiaoQD) * 100;
 
-let d = 0;
-let dd = 0;
-let e = 0;
-let kpi = 0;
+      // =================================================
+      // ROLE
+      // =================================================
+      const userInfo = dsPhong.find(
+        x => String(x[iMa]).trim() === ma
+      );
 
-// 🔥 lãnh đạo
-if (
-  userRole === 'TRUONG_PHONG' ||
-  userRole === 'PHO_PHONG'
-) {
-  d = 100;
-  dd = 100;
-  e = 100;
+      const userRole = String(userInfo?.[iRole] || '').trim();
 
-  kpi = ((a + b + c + d + dd + e) / 6) * 70 / 100;
-} else {
-  kpi = ((a + b + c) / 3) * 70 / 100;
-}
-      // 🔥 TÍNH TIÊU CHÍ
+      let d = 0;
+      let dd = 0;
+      let e = 0;
+
+      let kpi = 0;
+
+      // =================================================
+      // KPI LÃNH ĐẠO
+      // =================================================
+      if (
+        userRole === 'TRUONG_PHONG' ||
+        userRole === 'PHO_PHONG'
+      ) {
+
+        d = 100;
+        dd = 100;
+        e = 100;
+
+        kpi =
+          ((a + b + c + d + dd + e) / 6) *
+          70 / 100;
+
+      } else {
+
+        kpi =
+          ((a + b + c) / 3) *
+          70 / 100;
+
+      }
+
+      // =================================================
+      // TIÊU CHÍ CHUNG
+      // =================================================
       let tongTieuChi = 0;
+
       tcRows.forEach(t => {
+
         if (
           String(t[iTC_Thang]).trim() === thang &&
           String(t[iTC_Ma]).trim() === ma
         ) {
+
           tongTieuChi += Number(t[iTC_Diem]) || 0;
+
         }
+
       });
 
+      // =================================================
+      // TỔNG ĐIỂM
+      // =================================================
       const tongDiem = kpi + tongTieuChi;
-newRows.push([
-  thang,
-  ma,
-  userMap[ma].hoTen,
 
-  Number(a.toFixed(4)),
-  Number(b.toFixed(4)),
-  Number(c.toFixed(4)),
+      // =================================================
+      // PUSH
+      // =================================================
+      newRows.push([
 
-  Number(kpi.toFixed(4)),
-  Number(tongDiem.toFixed(4)),
+        thang,
+        ma,
+        userMap[ma].hoTen,
 
-  'DA_CHOT',
+        Number(a.toFixed(4)),
+        Number(b.toFixed(4)),
+        Number(c.toFixed(4)),
 
-  d,
-  dd,
-  e
-]);
+        Number(kpi.toFixed(4)),
+        Number(tongDiem.toFixed(4)),
 
-});
+        'DA_CHOT',
 
-    // =========================
-    // 📌 APPEND
-    // =========================
+        d,
+        dd,
+        e
+
+      ]);
+
+    });
+
+    // =====================================================
+    // APPEND KPI_LUU_TRU
+    // =====================================================
     if (newRows.length > 0) {
+
       const startRow = kRows.length + 2;
-      const range = `A${startRow}:L${startRow + newRows.length - 1}`;
-      await updateSheet('KPI_LUU_TRU', range, newRows);
+
+      const range =
+        `A${startRow}:L${startRow + newRows.length - 1}`;
+
+      await updateSheet(
+        'KPI_LUU_TRU',
+        range,
+        newRows
+      );
+
     }
 
+    // =====================================================
+    // SUCCESS
+    // =====================================================
     return res.status(200).json({
-  success: true,
-  message: `Đã chốt ${newRows.length} nhân sự phòng ${phongBan}`
-});
 
-} catch (err: any) {
-  console.error('ERROR CHOT:', err);
+      success: true,
 
-  return res.status(500).json({
-    success: false,
-    error: String(err?.message || err)
-  });
+      message:
+        `Đã chốt ${newRows.length} nhân sự phòng ${phongBan}`
+
+    });
+
+  } catch (err: any) {
+
+    console.error('ERROR CHOT:', err);
+
+    return res.status(500).json({
+
+      success: false,
+
+      error: String(err?.message || err)
+
+    });
+
+  }
+
 }
