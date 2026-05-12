@@ -219,26 +219,6 @@ if (
       });
 
       const tongDiem = kpi + tongTieuChi;
-
-// 🔥 d đ e chỉ áp dụng cho lãnh đạo
-let d = 0;
-let dd = 0;
-let e = 0;
-
-// 🔥 d đ e chỉ áp dụng cho lãnh đạo
-let d = 0;
-let dd = 0;
-let e = 0;
-
-if (
-  userRole === 'TRUONG_PHONG' ||
-  userRole === 'PHO_PHONG'
-) {
-  d = 100;
-  dd = 100;
-  e = 100;
-}
-
 newRows.push([
   thang,
   ma,
