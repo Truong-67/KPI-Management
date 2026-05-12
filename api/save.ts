@@ -69,14 +69,31 @@ if (kpiData && kpiData.length > 1) {
 
   const iK_Thang = getIdx('Thang');
   const iK_TrangThai = getIdx('TRANG_THAI');
+  const iK_MaNS = getIdx('MaNhanSu');
 
   const kRows = kpiData.slice(1);
 
   // 🔥 CHỈ KHÓA KHI ĐÃ CHỐT
-  const isLocked = kRows.find(r =>
-    String(r[iK_Thang]).trim() === String(thang).trim() &&
-    String(r[iK_TrangThai]).trim() === 'DA_CHOT'
+  const isLocked = kRows.find(r => {
+
+  const sameMonth =
+    String(r[iK_Thang]).trim() === String(thang).trim();
+
+  const daChot =
+    String(r[iK_TrangThai]).trim() === 'DA_CHOT';
+
+  const maNS = String(r[iK_MaNS]).trim();
+
+  const ns = dmNhanSu.find(
+    x => String(x.MaNhanSu).trim() === maNS
   );
+
+  const samePhong =
+    String(ns?.PhongBan || '').trim() ===
+    String(user?.phongBan || '').trim();
+
+  return sameMonth && daChot && samePhong;
+});
 
   if (isLocked) {
     return res.status(403).json({
