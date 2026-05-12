@@ -194,24 +194,45 @@ export default async function handler(req: any, res: any) {
 
       const tongDiem = kpi + tongTieuChi;
 
-      newRows.push([
+// 🔥 d đ e cho lãnh đạo
+let d = 0;
+let dd = 0;
+let e = 0;
+
+// 🔥 lãnh đạo = 100
+if (role === 'TRUONG_PHONG' || role === 'PHO_PHONG') {
+  d = 100;
+  dd = 100;
+  e = 100;
+}
+
+newRows.push([
   thang,
   ma,
   userMap[ma].hoTen,
+
   Number(a.toFixed(4)),
   Number(b.toFixed(4)),
   Number(c.toFixed(4)),
+
   Number(kpi.toFixed(4)),
   Number(tongDiem.toFixed(4)),
-  'DA_CHOT'
+
+  'DA_CHOT',
+
+  d,
+  dd,
+  e
 ]);
+
+});
 
     // =========================
     // 📌 APPEND
     // =========================
     if (newRows.length > 0) {
       const startRow = kRows.length + 2;
-      const range = `A${startRow}:I${startRow + newRows.length - 1}`;
+      const range = `A${startRow}:L${startRow + newRows.length - 1}`;
       await updateSheet('KPI_LUU_TRU', range, newRows);
     }
 
